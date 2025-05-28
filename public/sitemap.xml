@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd
+        http://www.google.com/schemas/sitemap-image/1.1
+        http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd">
+  
+  <!-- Homepage -->
+  <url>
+    <loc>https://vsharp.com/</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://vsharp.com/logo.png</image:loc>
+      <image:title>VSharp Logo</image:title>
+      <image:caption>VSharp - Premium Game Cheats and Hacks Platform</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://vsharp.com/og-image.jpg</image:loc>
+      <image:title>VSharp Platform Preview</image:title>
+      <image:caption>Discover premium game cheats for popular games</image:caption>
+    </image:image>
+  </url>
+  
+  <!-- Games Section -->
+  <url>
+    <loc>https://vsharp.com/#games</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://vsharp.com/games/pubg.avif</image:loc>
+      <image:title>PUBG Cheats</image:title>
+      <image:caption>Premium PUBG cheats and hacks</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://vsharp.com/games/valrorant.avif</image:loc>
+      <image:title>Valorant Hacks</image:title>
+      <image:caption>Advanced Valorant cheats and enhancements</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://vsharp.com/games/fornite.avif</image:loc>
+      <image:title>Fortnite Cheats</image:title>
+      <image:caption>Fortnite cheats for competitive advantage</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://vsharp.com/games/apex.avif</image:loc>
+      <image:title>Apex Legends Hacks</image:title>
+      <image:caption>Apex Legends cheats and modifications</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://vsharp.com/games/delta.avif</image:loc>
+      <image:title>Delta Force Cheats</image:title>
+      <image:caption>Delta Force game enhancements</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://vsharp.com/games/marvel.avif</image:loc>
+      <image:title>Marvel Rivals Hacks</image:title>
+      <image:caption>Marvel Rivals cheats and tools</image:caption>
+    </image:image>
+  </url>
+  
+  <!-- Features Section -->
+  <url>
+    <loc>https://vsharp.com/#features</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Individual Game Pages (if they exist) -->
+  <url>
+    <loc>https://vsharp.com/games/pubg</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://vsharp.com/games/pubg.avif</image:loc>
+      <image:title>PUBG Cheats and Hacks</image:title>
+      <image:caption>Premium PUBG cheats with aimbot, wallhack, and ESP features</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://vsharp.com/games/valorant</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://vsharp.com/games/valrorant.avif</image:loc>
+      <image:title>Valorant Cheats and Hacks</image:title>
+      <image:caption>Advanced Valorant cheats for competitive gaming</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://vsharp.com/games/fortnite</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://vsharp.com/games/fornite.avif</image:loc>
+      <image:title>Fortnite Cheats and Hacks</image:title>
+      <image:caption>Fortnite cheats for battle royale dominance</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://vsharp.com/games/apex-legends</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://vsharp.com/games/apex.avif</image:loc>
+      <image:title>Apex Legends Cheats and Hacks</image:title>
+      <image:caption>Apex Legends enhancements and modifications</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Support and Community Pages -->
+  <url>
+    <loc>https://vsharp.com/support</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://vsharp.com/discord</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://vsharp.com/terms</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://vsharp.com/privacy</loc>
+    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset> 
