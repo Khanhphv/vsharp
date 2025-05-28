@@ -7,7 +7,7 @@ interface Game {
 }
 
 const games: Game[] = [
-  { name: 'PUBG', status: 'Working', image: '/games/pubg.avif' },
+  { name: 'PUBG ', status: 'Working', image: '/games/pubg.avif' },
   { name: 'Valorant', status: 'Working', image: '/games/valrorant.avif' },
   { name: 'Delta Force', status: 'Working', image: '/games/delta.avif' },
   { name: 'Fortnite', status: 'Working', image: '/games/fornite.avif' },
