@@ -124,7 +124,7 @@ Allow: /*.ttf$
 Allow: /*.eot$
 
 # Allow social media crawlers for rich previews
-Allow: /og-image.jpg
+Allow: /og-image.png
 Allow: /twitter-image.jpg
 Allow: /site.webmanifest
 
