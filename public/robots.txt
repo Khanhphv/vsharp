@@ -68,7 +68,7 @@ User-agent: PetalBot
 Disallow: /
 
 # Sitemap location
-Sitemap: https://vsharp.com/sitemap.xml
+Sitemap: https://vsharp.net/sitemap.xml
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1
@@ -135,4 +135,4 @@ Request-rate: 1/1s
 Visit-time: 0100-2300
 
 # Host preference (helps with www vs non-www)
-Host: vsharp.com 
+Host: vsharp.net 
