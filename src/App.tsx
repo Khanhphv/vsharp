@@ -10,15 +10,11 @@ function App() {
 
   useEffect(() => {
     // Check if splash has been shown before (persists across sessions)
-    const splashShown = localStorage.getItem('splashShown');
-    if (splashShown) {
-      setShowSplash(false);
-      setIsLoaded(true);
-    }
+    setShowSplash(false);
+    setIsLoaded(true);
   }, []);
 
   const handleSplashComplete = () => {
-    localStorage.setItem('splashShown', 'true');
     setShowSplash(false);
     setIsLoaded(true);
   };
