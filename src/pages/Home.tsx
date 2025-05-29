@@ -6,6 +6,7 @@ import Features from '../components/Features';
 import Footer from '../components/Footer';
 import SEOHead from '../components/SEOHead';
 import FAQ from '../components/FAQ';
+import DiscordCommunity from '../components/DiscordCommunity';
 
 const Home: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ const Home: React.FC = () => {
         <Features />
         <TrendingApps />
         <FAQ />
+        <DiscordCommunity />
       </main>
       <Footer />
     </div>
