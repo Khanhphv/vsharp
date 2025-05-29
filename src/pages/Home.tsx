@@ -5,6 +5,7 @@ import TrendingApps from '../components/TrendingApps';
 import Features from '../components/Features';
 import Footer from '../components/Footer';
 import SEOHead from '../components/SEOHead';
+import FAQ from '../components/FAQ';
 
 const Home: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const Home: React.FC = () => {
         <Hero />
         <Features />
         <TrendingApps />
+        <FAQ />
       </main>
       <Footer />
     </div>
