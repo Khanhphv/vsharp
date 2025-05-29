@@ -1,4 +1,5 @@
 import React from 'react';
+import { DISCORD_INVITE } from '../constants/links';
 
 interface Game {
   name: string;
@@ -101,7 +102,7 @@ const TrendingApps: React.FC = () => {
                       </span>
                     </div>
                     <a
-                      href="https://discord.com/invite/jBfN9C6g55"
+                      href={DISCORD_INVITE}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="relative bg-gradient-to-r from-primary-500/80 to-primary-600/80 hover:from-primary-500 hover:to-primary-600 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary-500/30 font-medium text-sm group/btn overflow-hidden"

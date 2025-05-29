@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaGamepad, FaDiscord, FaChevronDown } from 'react-icons/fa';
+import { DISCORD_INVITE_LINK } from '../constants/links';
 
 const Hero: React.FC = () => {
   const scrollDown = () => {
@@ -78,7 +79,7 @@ const Hero: React.FC = () => {
             <span className="relative z-10">Game Catalog</span>
           </a>
           <a
-            href="https://discord.com/invite/jBfN9C6g55"
+            href={DISCORD_INVITE_LINK}
             target="_blank"
             rel="noopener noreferrer"
             className="group relative w-full sm:w-auto text-white px-10 md:px-12 py-5 md:py-6 rounded-3xl text-lg md:text-xl font-semibold transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-purple-500/50 flex items-center justify-center border-2 border-purple-400 glass-dark backdrop-blur-xl overflow-hidden animate-slide-up-from-bottom"

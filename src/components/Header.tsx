@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
+import { DISCORD_INVITE } from '../constants/links';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -116,7 +117,7 @@ const Header: React.FC = () => {
             </button>
 
             <a
-              href="https://discord.com/invite/jBfN9C6g55"
+              href={DISCORD_INVITE}
               target="_blank"
               rel="noopener noreferrer"
               className="relative bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/40 group overflow-hidden animate-glow"
@@ -176,7 +177,7 @@ const Header: React.FC = () => {
                 <span className="relative z-10">About</span>
               </button>
               <a
-                href="https://discord.com/invite/jBfN9C6g55"
+                href={DISCORD_INVITE}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-6 py-4 rounded-2xl text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/40 mx-4 mt-4 group overflow-hidden"

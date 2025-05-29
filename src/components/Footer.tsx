@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaDiscord, FaEnvelope, FaHeart, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { DISCORD_INVITE } from '../constants/links';
 
 const Footer: React.FC = () => {
   return (
@@ -35,7 +36,7 @@ const Footer: React.FC = () => {
             </h3>
             <div className="flex space-x-4">
               <a
-                href="https://discord.com/invite/jBfN9C6g55"
+                href={DISCORD_INVITE}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative p-3 rounded-2xl glass-dark backdrop-blur-xl border border-primary-500/20 hover:border-primary-400/40 dark:text-dark-secondary text-light-secondary hover:text-primary-400 transition-all duration-300 hover:scale-110 group/social"
@@ -44,7 +45,7 @@ const Footer: React.FC = () => {
                 <FaDiscord className="w-6 h-6 md:w-7 md:h-7 relative z-10 group-hover/social:rotate-12 transition-transform duration-300" />
               </a>
               <a
-                href="https://discord.com/invite/jBfN9C6g55"
+                href={DISCORD_INVITE}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative p-3 rounded-2xl glass-dark backdrop-blur-xl border border-primary-500/20 hover:border-primary-400/40 dark:text-dark-secondary text-light-secondary hover:text-primary-400 transition-all duration-300 hover:scale-110 group/social"
@@ -53,7 +54,7 @@ const Footer: React.FC = () => {
                 <FaTwitter className="w-6 h-6 md:w-7 md:h-7 relative z-10 group-hover/social:rotate-12 transition-transform duration-300" />
               </a>
               <a
-                href="https://discord.com/invite/jBfN9C6g55"
+                href={DISCORD_INVITE}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative p-3 rounded-2xl glass-dark backdrop-blur-xl border border-primary-500/20 hover:border-primary-400/40 dark:text-dark-secondary text-light-secondary hover:text-primary-400 transition-all duration-300 hover:scale-110 group/social"
@@ -69,7 +70,7 @@ const Footer: React.FC = () => {
               Contact
             </h3>
             <a
-              href="https://discord.com/invite/jBfN9C6g55"
+              href={DISCORD_INVITE}
               target="_blank"
               rel="noopener noreferrer"
               className="relative group/btn bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/40 flex items-center overflow-hidden animate-glow"
