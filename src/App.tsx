@@ -10,8 +10,6 @@ function App() {
 
   useEffect(() => {
     // Check if splash has been shown before (persists across sessions)
-    setShowSplash(false);
-    setIsLoaded(true);
   }, []);
 
   const handleSplashComplete = () => {
