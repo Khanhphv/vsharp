@@ -51,19 +51,19 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           className={`relative mb-8 transition-all duration-1000 ${animationPhase >= 1 ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`}
         >
           <div className="relative">
-            {/* Glowing background */}
+            {/* Glowing background - Updated with lighter glow */}
             <div
-              className={`absolute inset-0 bg-gradient-to-r from-primary-500/30 to-purple-500/30 rounded-full blur-3xl transition-all duration-1000 ${animationPhase >= 2 ? 'scale-150 opacity-100' : 'scale-100 opacity-0'}`}
+              className={`absolute inset-0 bg-gradient-to-r from-primary-500/15 to-purple-500/15 rounded-full blur-2xl transition-all duration-1000 ${animationPhase >= 2 ? 'scale-150 opacity-100' : 'scale-100 opacity-0'}`}
             ></div>
 
-            {/* Logo */}
+            {/* Logo - Updated with lighter border */}
             <div
-              className={`relative p-8 rounded-full glass-dark backdrop-blur-xl border-2 border-primary-500/30 transition-all duration-1000 ${animationPhase >= 1 ? 'animate-glow' : ''}`}
+              className={`relative p-8 rounded-full glass-dark backdrop-blur-xl border border-primary-500/20 transition-all duration-1000 ${animationPhase >= 1 ? 'animate-glow' : ''}`}
             >
               <img
                 src="/logo.png"
                 alt="VSharp Logo"
-                className={`w-24 h-24 md:w-32 md:h-32 transition-all duration-1000 ${animationPhase >= 2 ? 'animate-float' : ''}`}
+                className={`w-24 h-24 md:w-32 md:h-32 transition-all duration-1000 ${animationPhase >= 2 ? 'animate-float' : ''} mx-auto`}
               />
             </div>
           </div>
