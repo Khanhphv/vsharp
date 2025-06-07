@@ -1,4 +1,4 @@
-export const DISCORD_INVITE_LINK = 'https://discord.gg/tCz9dFENZN';
+export const DISCORD_INVITE_LINK = 'https://discord.com/invite/SrXes4UgHQ';
 
 export const LINKS = {
   DISCORD: {
