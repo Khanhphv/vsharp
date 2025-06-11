@@ -85,15 +85,15 @@ const Tools: React.FC = () => {
                   >
                     {feature.title}
                   </h3>
+                  <div className="mt-4">
+                    <span className="text-lg font-bold text-primary-500">${feature.price}</span>
+                  </div>
                   <p
                     className="dark:text-dark-secondary text-light-secondary text-sm md:text-base leading-relaxed group-hover:text-dark-primary dark:group-hover:text-dark-primary group-hover:text-light-primary transition-colors duration-300"
                     itemProp="description"
                   >
                     {feature.description}
                   </p>
-                  <div className="mt-4">
-                    <span className="text-lg font-bold text-primary-500">${feature.price}</span>
-                  </div>
                 </div>
 
                 <div
