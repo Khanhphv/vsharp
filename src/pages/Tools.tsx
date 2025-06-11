@@ -38,9 +38,6 @@ const Tools: React.FC = () => {
     console.log(feature);
   };
 
-  // eslint-disable-next-line no-constant-binary-expression
-  // const totalPrice = selectedFeature ? selectedFeature.price * (Number(amount) ?? 1) : 0;
-
   return (
     <div className="pt-24 dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20">
       <section
@@ -69,13 +66,10 @@ const Tools: React.FC = () => {
                 itemScope
                 itemType="https://schema.org/Service"
               >
-                {/* Animated background gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                {/* Glowing border effect */}
                 <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary-500/20 via-purple-500/20 to-primary-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
 
-                {/* Content */}
                 <div className="relative z-10">
                   <div className="flex justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
                     <div
@@ -91,18 +85,17 @@ const Tools: React.FC = () => {
                   >
                     {feature.title}
                   </h3>
-                  <div className="mt-4">
-                    <span className="text-lg font-bold text-primary-500">${feature.price}</span>
-                  </div>
                   <p
                     className="dark:text-dark-secondary text-light-secondary text-sm md:text-base leading-relaxed group-hover:text-dark-primary dark:group-hover:text-dark-primary group-hover:text-light-primary transition-colors duration-300"
                     itemProp="description"
                   >
                     {feature.description}
                   </p>
+                  <div className="mt-4">
+                    <span className="text-lg font-bold text-primary-500">${feature.price}</span>
+                  </div>
                 </div>
 
-                {/* Floating particles effect */}
                 <div
                   className="absolute top-4 right-4 w-2 h-2 bg-primary-500/30 rounded-full animate-pulse"
                   aria-hidden="true"
@@ -116,57 +109,6 @@ const Tools: React.FC = () => {
           </section>
         </div>
       </section>
-
-      {/* Popup */}
-      {/* {selectedFeature && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-          onClick={handleClosePopup}
-        >
-          <div
-            className="bg-dark-surface p-8 rounded-3xl max-w-md w-full mx-4 transform transition-all"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-center mb-6">
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary-500/20 to-purple-600/20">
-                {selectedFeature.icon}
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-center mb-4">{selectedFeature.title}</h3>
-            <p className="text-dark-secondary mb-6">{selectedFeature.description}</p>
-            <div className="text-center mb-6">
-              <span className="text-2xl font-bold text-primary-500">
-                ${selectedFeature.price} / day
-              </span>
-            </div>
-            <div className="mb-6">
-              <label
-                htmlFor="amount"
-                className="block text-sm font-medium text-dark-secondary mb-2"
-              >
-                Amount
-              </label>
-              <input
-                required
-                type="number"
-                id="amount"
-                onChange={handleAmountChange}
-                className="w-full px-4 py-2 rounded-xl bg-dark-surface border border-dark-border focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
-              />
-            </div>
-            <div className="text-center mb-6">
-              <span className="text-lg font-medium text-dark-secondary">Total: </span>
-              <span className="text-2xl font-bold text-primary-500">${totalPrice}</span>
-            </div>
-            <button
-              className="w-full bg-primary-500 text-white py-3 rounded-xl hover:bg-primary-600 transition-colors"
-              onClick={handleBuyNow}
-            >
-              Buy Now
-            </button>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };
