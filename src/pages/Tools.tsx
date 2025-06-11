@@ -1,61 +1,45 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FaRocket } from 'react-icons/fa';
 
 const features: {
   icon: React.ReactNode;
   title: string;
   description: string;
-  price: number;
+  price: number | string;
 }[] = [
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'Apex-vsharp',
     description: 'VSHARP PRODUCT FOR APEX LEGENDS',
-    price: 20,
+    price: '...',
   },
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'DF-MAIN',
     description: 'Main delta force cheat.',
-    price: 20,
+    price: '...',
   },
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'RUST-HYPRO',
     description: 'This service is specific for Seller HYDRO for RUST cheat.',
-    price: 20,
+    price: '...',
   },
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'BO6-VSHARP',
     description: 'This is a vsharp brand of Black OPS 6 cheat.',
-    price: 20,
+    price: '...',
   },
 ];
 
 const Tools: React.FC = () => {
-  const [selectedFeature, setSelectedFeature] = useState<(typeof features)[0] | null>(null);
-  const [amount, setAmount] = useState<string>('');
-
   const handleFeatureClick = (feature: (typeof features)[0]) => {
-    setSelectedFeature(feature);
-  };
-
-  const handleClosePopup = () => {
-    setSelectedFeature(null);
-    setAmount('');
-  };
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(e.target.value);
-  };
-
-  const handleBuyNow = () => {
-    console.log('Buy Now');
+    console.log(feature);
   };
 
   // eslint-disable-next-line no-constant-binary-expression
-  const totalPrice = selectedFeature ? selectedFeature.price * (Number(amount) ?? 1) : 0;
+  // const totalPrice = selectedFeature ? selectedFeature.price * (Number(amount) ?? 1) : 0;
 
   return (
     <div className="pt-24 dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20">
@@ -134,7 +118,7 @@ const Tools: React.FC = () => {
       </section>
 
       {/* Popup */}
-      {selectedFeature && (
+      {/* {selectedFeature && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={handleClosePopup}
@@ -182,7 +166,7 @@ const Tools: React.FC = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

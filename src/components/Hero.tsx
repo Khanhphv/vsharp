@@ -1,8 +1,10 @@
 import React from 'react';
 import { FaGamepad, FaDiscord, FaChevronDown } from 'react-icons/fa';
 import { DISCORD_INVITE_LINK } from '../constants/links';
+import { useNavigate } from 'react-router-dom';
 
 const Hero: React.FC = () => {
+  const navigate = useNavigate();
   const scrollDown = () => {
     window.scrollBy({
       top: window.innerHeight,
@@ -64,8 +66,15 @@ const Hero: React.FC = () => {
           style={{ animationDelay: '0.8s' }}
           aria-label="Main actions"
         >
-          <a
-            href="#games"
+          <div
+            onClick={() => navigate('/tools')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                navigate('/tools');
+              }
+            }}
             className="group relative w-full sm:w-auto bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-10 md:px-12 py-5 md:py-6 rounded-3xl text-lg md:text-xl font-semibold transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-primary-500/50 flex items-center justify-center overflow-hidden animate-glow animate-slide-up-from-bottom"
             style={{ animationDelay: '1s' }}
             aria-label="Browse our game catalog"
@@ -77,7 +86,7 @@ const Hero: React.FC = () => {
               aria-hidden="true"
             />
             <span className="relative z-10">Game Catalog</span>
-          </a>
+          </div>
           <a
             href={DISCORD_INVITE_LINK}
             target="_blank"
