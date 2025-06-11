@@ -1,8 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Home from './pages/Home';
+import Tools from './pages/Tools';
 import { ThemeProvider } from './context/ThemeContext';
 import SplashScreen from './components/SplashScreen';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import SEOHead from './components/SEOHead';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -37,9 +41,19 @@ function App() {
             <div className="absolute bottom-1/4 left-1/2 w-1 h-1 bg-purple-500/30 rounded-full animate-ping"></div>
           </div>
 
-          <Routes>
-            <Route path="/" element={<Home />} />
-          </Routes>
+          <div className="min-h-screen flex flex-col">
+            <SEOHead />
+            <Header />
+            <main className="flex-grow">
+              <div className="min-h-screen flex flex-col">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/tools" element={<Tools />} />
+                </Routes>
+              </div>
+            </main>
+            <Footer />
+          </div>
         </div>
       </Router>
     </ThemeProvider>

@@ -2,13 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { DISCORD_INVITE } from '../constants/links';
+import { useNavigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
 
   const smoothScrollTo = (targetId: string) => {
+    const currentUrl = window.location.pathname;
+    console.log(currentUrl);
+    if (currentUrl === '/tools') {
+      navigate('/');
+    }
     const element = document.getElementById(targetId);
     if (element) {
       element.scrollIntoView({

@@ -10,7 +10,7 @@ import DiscordCommunity from '../components/DiscordCommunity';
 
 const Home: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       <SEOHead />
       <Header />
       <main className="flex-grow">
@@ -21,7 +21,7 @@ const Home: React.FC = () => {
         <DiscordCommunity />
       </main>
       <Footer />
-    </div>
+    </>
   );
 };
 
