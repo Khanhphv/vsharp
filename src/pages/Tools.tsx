@@ -103,10 +103,7 @@ const Tools: React.FC = () => {
         service: selectedFeature.title,
       });
       setSuccess('Invoice created successfully!');
-      setTimeout(() => {
-        window.open(invoice.paymentUrl, '_blank');
-      }, 3000);
-      handleClosePopup();
+      window.open(invoice.paymentUrl);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create invoice');
     } finally {
