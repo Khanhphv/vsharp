@@ -12,28 +12,28 @@ const features: {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'Apex-vsharp',
     description: 'VSHARP PRODUCT FOR APEX LEGENDS',
-    price: '0.012LTC',
+    price: '0.06LTC',
     isSale: true,
   },
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'DF-MAIN',
     description: 'Main delta force cheat.',
-    price: '0.012LTC',
+    price: '0.06LTC',
     isSale: true,
   },
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'RUST-HYPRO',
     description: 'This service is specific for Seller HYDRO for RUST cheat.',
-    price: '0.012LTC',
+    price: '0.06LTC',
     isSale: true,
   },
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'BO6-VSHARP',
     description: 'This is a vsharp brand of Black OPS 6 cheat.',
-    price: '0.012LTC',
+    price: '0.06LTC',
     isSale: true,
   },
 ];
@@ -224,7 +224,9 @@ const Tools: React.FC = () => {
                 {selectedFeature.icon}
               </div>
             </div>
-            <h3 className="text-2xl font-bold text-center mb-4">{selectedFeature.title}</h3>
+            <h3 className="text-2xl font-bold text-center mb-4">
+              {selectedFeature.title} - Key Day
+            </h3>
             <p className="text-dark-secondary mb-6 text-center">{selectedFeature.description}</p>
             <form onSubmit={handleBuy}>
               <div className="mb-4">
