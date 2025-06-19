@@ -51,7 +51,7 @@ async function createInvoice({
   email: string;
   service: string;
 }) {
-  const response = await fetch('http://localhost:8080/api/invoices/coin-payment', {
+  const response = await fetch('https://payment.vsharp.net/api/invoices/coin-payment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount, currency, currency2, email, service }),
