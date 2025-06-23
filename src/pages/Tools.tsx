@@ -104,84 +104,57 @@ async function processWeb3Payment({ amount, service }: { amount: number; service
   })) as string;
 
   const balanceInEth = parseInt(balance, 16) / 10 ** 18;
-  const requiredAmount = amount + 0.001; // Add buffer for gas fees
+  console.log('User balance:', balanceInEth, 'ETH');
+  console.log('Required amount:', amount, 'ETH');
 
-  if (balanceInEth < requiredAmount) {
+  // Simple balance check with buffer
+  if (balanceInEth < amount + 0.01) {
     throw new Error(
-      `Insufficient balance. You have ${balanceInEth.toFixed(4)} ETH but need at least ${requiredAmount.toFixed(4)} ETH (including gas fees).`
+      `Insufficient balance. You have ${balanceInEth.toFixed(4)} ETH but need at least ${(amount + 0.01).toFixed(4)} ETH (including gas fees).`
     );
   }
-
-  // Get current gas price for faster processing
-  const gasPrice = (await window.ethereum.request({
-    method: 'eth_gasPrice',
-    params: [],
-  })) as string;
-
-  // Calculate priority fee (tip) for faster inclusion
-  const baseGasPrice = parseInt(gasPrice, 16);
-  const priorityFee = Math.floor(baseGasPrice * 0.15); // 15% tip for faster processing
-  const maxFeePerGas = baseGasPrice + priorityFee;
 
   // Convert ETH amount to wei (1 ETH = 10^18 wei)
-  const amountInWei = (amount * 10 ** NETWORK_CONFIG.TARGET_NETWORK.decimals).toString(16);
+  const amountInWei = (amount * 10 ** 18).toString(16);
+  console.log('Amount in wei:', amountInWei);
 
-  // Estimate gas limit for the transaction
-  const gasEstimate = (await window.ethereum.request({
-    method: 'eth_estimateGas',
-    params: [
-      {
-        to: NETWORK_CONFIG.PAYMENT.walletAddress,
-        from: account,
-        value: `0x${amountInWei}`,
-        data: '0x',
-      },
-    ],
-  })) as string;
-
-  // Validate gas estimate
-  if (!gasEstimate || gasEstimate === '0x0') {
-    throw new Error('Failed to estimate gas. Please check the recipient address and try again.');
-  }
-
-  // Calculate total gas cost
-  const gasLimit = parseInt(gasEstimate, 16);
-  const totalGasCost = (maxFeePerGas * gasLimit) / 10 ** 18;
-  const totalRequired = amount + totalGasCost;
-
-  if (balanceInEth < totalRequired) {
-    throw new Error(
-      `Insufficient balance for transaction. You need ${totalRequired.toFixed(4)} ETH (${amount.toFixed(4)} + ${totalGasCost.toFixed(4)} gas) but have ${balanceInEth.toFixed(4)} ETH.`
-    );
-  }
-
-  // Create optimized transaction object with EIP-1559 parameters
+  // Use simple transaction parameters without complex gas calculations
   const transactionParameters = {
     to: NETWORK_CONFIG.PAYMENT.walletAddress,
     from: account,
     value: `0x${amountInWei}`,
     data: '0x',
-    // EIP-1559 parameters for faster processing
-    maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
-    maxPriorityFeePerGas: `0x${priorityFee.toString(16)}`,
-    gasLimit: gasEstimate,
-    type: '0x2', // EIP-1559 transaction type
   };
 
-  // Validate recipient address
-  if (
-    !NETWORK_CONFIG.PAYMENT.walletAddress ||
-    NETWORK_CONFIG.PAYMENT.walletAddress === '0x0000000000000000000000000000000000000000'
-  ) {
-    throw new Error('Invalid recipient address. Please contact support.');
-  }
+  console.log('Transaction parameters:', transactionParameters);
 
   try {
-    // Send transaction with optimized parameters
+    // Hash transaction parameters for verification
+    const paramHash = await hashTransactionParams(transactionParameters);
+    console.log('Transaction parameter hash:', paramHash);
+
+    // Send transaction with simple parameters
     const txHash = await window.ethereum.request({
       method: 'eth_sendTransaction',
       params: [transactionParameters],
     });
+
+    // Validate transaction hash
+    if (
+      !txHash ||
+      txHash === '0x' ||
+      txHash === '0x0' ||
+      (typeof txHash === 'string' && txHash.length < 10)
+    ) {
+      throw new Error('Transaction failed: Invalid transaction hash received.');
+    }
+
+    console.log('Transaction hash:', txHash);
+
+    // Create a combined hash for additional verification
+    const combinedData = `${txHash}-${paramHash}-${Date.now()}`;
+    const verificationHash = await hashTransaction(combinedData);
+    console.log('Verification hash:', verificationHash);
 
     // Send transaction details to your backend
     const response = await fetch(`${NETWORK_CONFIG.PAYMENT.apiUrl}/payments/web3`, {
@@ -193,6 +166,8 @@ async function processWeb3Payment({ amount, service }: { amount: number; service
         service,
         userAddress: account,
         network: NETWORK_CONFIG.TARGET_NETWORK.name.toLowerCase().replace(' ', '_'),
+        paramHash,
+        verificationHash,
       }),
     });
 
@@ -202,20 +177,31 @@ async function processWeb3Payment({ amount, service }: { amount: number; service
 
     const responseData = await response.json();
 
-    return { txHash, account, responseData };
+    return { txHash, account, responseData, paramHash, verificationHash };
   } catch (error) {
+    console.error('Transaction error:', error);
+
     // Handle specific MetaMask errors
     if (error instanceof Error) {
-      if (error.message.includes('likely to fail')) {
+      if (
+        error.message.includes('does not have a transaction hash') ||
+        error.message.includes('there was a problem')
+      ) {
         throw new Error(
-          'Transaction would fail. Please check your balance and try again with a lower amount or ensure you have enough ETH for gas fees.'
+          'Transaction failed: Network rejected the transaction. This usually means insufficient balance or invalid parameters. Please check your balance and try again.'
         );
+      } else if (error.message.includes('likely to fail')) {
+        throw new Error('Transaction would fail. Please check your balance and try again.');
       } else if (error.message.includes('insufficient funds')) {
         throw new Error('Insufficient funds. Please add more ETH to your wallet.');
       } else if (error.message.includes('user rejected')) {
         throw new Error('Transaction was cancelled by user.');
       } else if (error.message.includes('nonce')) {
         throw new Error('Transaction nonce error. Please try again.');
+      } else if (error.message.includes('execution reverted')) {
+        throw new Error('Transaction reverted. This might be due to contract issues.');
+      } else if (error.message.includes('RPC Error')) {
+        throw new Error('Network error. Please check your internet connection and try again.');
       }
     }
     throw error;
@@ -335,6 +321,60 @@ async function accelerateTransaction(txHash: string) {
     console.error('Transaction acceleration failed:', error);
     return false;
   }
+}
+
+// Utility function to hash transaction data
+async function hashTransaction(data: string): Promise<string> {
+  // Simple hash function using built-in crypto
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(data);
+
+  // Use Web Crypto API for SHA-256 hashing
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
+// Hash transaction parameters for verification
+async function hashTransactionParams(params: {
+  to: string;
+  from: string;
+  value: string;
+  data: string;
+  nonce?: string;
+  gasPrice?: string;
+  gasLimit?: string;
+}): Promise<string> {
+  const paramString = JSON.stringify(params, Object.keys(params).sort());
+  return await hashTransaction(paramString);
+}
+
+// Create transaction signature hash (EIP-155 style)
+async function createTransactionHash(params: {
+  nonce: string;
+  gasPrice: string;
+  gasLimit: string;
+  to: string;
+  value: string;
+  data: string;
+  chainId: number;
+}): Promise<string> {
+  // RLP encoding would be needed for proper EIP-155 hashing
+  // This is a simplified version
+  const encoded = [
+    params.nonce,
+    params.gasPrice,
+    params.gasLimit,
+    params.to,
+    params.value,
+    params.data,
+    params.chainId,
+    '0x', // r
+    '0x', // s
+  ].join('');
+
+  return await hashTransaction(encoded);
 }
 
 const Tools: React.FC = () => {
@@ -557,6 +597,26 @@ const Tools: React.FC = () => {
       setError('Acceleration failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setAccelerating(false);
+    }
+  };
+
+  // Demo function to show transaction hashing
+  const demonstrateTransactionHashing = async () => {
+    try {
+      const demoParams = {
+        nonce: '0x0',
+        gasPrice: '0x09184e72a000',
+        gasLimit: '0x27100',
+        to: NETWORK_CONFIG.PAYMENT.walletAddress,
+        value: '0x00',
+        data: '0x',
+        chainId: 1,
+      };
+
+      const demoHash = await createTransactionHash(demoParams);
+      console.log('Demo transaction hash:', demoHash);
+    } catch (error) {
+      console.error('Demo hashing failed:', error);
     }
   };
 
