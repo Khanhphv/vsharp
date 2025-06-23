@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
-import { DISCORD_INVITE } from '../constants/links';
 import { useNavigate } from 'react-router-dom';
+import WalletConnect from './WalletConnect';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -192,6 +192,11 @@ const Header: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative z-10">Buy Now</span>
               </a>
+
+              {/* Mobile Wallet Connect */}
+              <div className="mx-4 mt-4">
+                <WalletConnect />
+              </div>
             </nav>
           </div>
         )}

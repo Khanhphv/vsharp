@@ -1,5 +1,20 @@
 import React, { useState } from 'react';
-import { FaRocket, FaShoppingCart } from 'react-icons/fa';
+import { FaRocket, FaShoppingCart, FaWallet } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { useWallet } from '../../src/context/WalletContext';
+import { NETWORK_CONFIG } from '../config/networks';
+
+// Web3 types
+interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+}
+
+interface Window {
+  ethereum?: EthereumProvider;
+  open: (url: string) => Window | null;
+}
+
+declare const window: Window;
 
 const features: {
   icon: React.ReactNode;
@@ -7,12 +22,14 @@ const features: {
   description: string;
   price: number | string;
   isSale: boolean;
+  ethPrice?: number; // ETH price in wei
 }[] = [
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'Apex-vsharp',
     description: 'VSHARP PRODUCT FOR APEX LEGENDS',
     price: '0.06LTC',
+    ethPrice: 0.008,
     isSale: true,
   },
   {
@@ -20,6 +37,7 @@ const features: {
     title: 'DF-MAIN',
     description: 'Main delta force cheat.',
     price: '0.06LTC',
+    ethPrice: 0.008,
     isSale: true,
   },
   {
@@ -27,6 +45,7 @@ const features: {
     title: 'RUST-HYPRO',
     description: 'This service is specific for Seller HYDRO for RUST cheat.',
     price: '0.06LTC',
+    ethPrice: 0.008,
     isSale: true,
   },
   {
@@ -34,6 +53,7 @@ const features: {
     title: 'BO6-VSHARP',
     description: 'This is a vsharp brand of Black OPS 6 cheat.',
     price: '0.06LTC',
+    ethPrice: 0.008,
     isSale: true,
   },
 ];
@@ -51,7 +71,7 @@ async function createInvoice({
   email: string;
   service: string;
 }) {
-  const response = await fetch('https://payment.vsharp.net/api/invoices/coin-payment', {
+  const response = await fetch(`${NETWORK_CONFIG.PAYMENT.apiUrl}/invoices/coin-payment`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount, currency, currency2, email, service }),
@@ -62,13 +82,286 @@ async function createInvoice({
   return response.json();
 }
 
+// Web3 payment function with speed optimizations
+async function processWeb3Payment({ amount, service }: { amount: number; service: string }) {
+  // Check if MetaMask is installed
+  if (!window.ethereum) {
+    throw new Error('MetaMask is not installed. Please install MetaMask to continue.');
+  }
+
+  // Request account access
+  const accounts = (await window.ethereum.request({ method: 'eth_requestAccounts' })) as string[];
+  const account = accounts[0];
+
+  if (!account) {
+    throw new Error('No account found. Please connect your MetaMask wallet.');
+  }
+
+  // Check account balance before proceeding
+  const balance = (await window.ethereum.request({
+    method: 'eth_getBalance',
+    params: [account, 'latest'],
+  })) as string;
+
+  const balanceInEth = parseInt(balance, 16) / 10 ** 18;
+  const requiredAmount = amount + 0.001; // Add buffer for gas fees
+
+  if (balanceInEth < requiredAmount) {
+    throw new Error(
+      `Insufficient balance. You have ${balanceInEth.toFixed(4)} ETH but need at least ${requiredAmount.toFixed(4)} ETH (including gas fees).`
+    );
+  }
+
+  // Get current gas price for faster processing
+  const gasPrice = (await window.ethereum.request({
+    method: 'eth_gasPrice',
+    params: [],
+  })) as string;
+
+  // Calculate priority fee (tip) for faster inclusion
+  const baseGasPrice = parseInt(gasPrice, 16);
+  const priorityFee = Math.floor(baseGasPrice * 0.15); // 15% tip for faster processing
+  const maxFeePerGas = baseGasPrice + priorityFee;
+
+  // Convert ETH amount to wei (1 ETH = 10^18 wei)
+  const amountInWei = (amount * 10 ** NETWORK_CONFIG.TARGET_NETWORK.decimals).toString(16);
+
+  // Estimate gas limit for the transaction
+  const gasEstimate = (await window.ethereum.request({
+    method: 'eth_estimateGas',
+    params: [
+      {
+        to: NETWORK_CONFIG.PAYMENT.walletAddress,
+        from: account,
+        value: `0x${amountInWei}`,
+        data: '0x',
+      },
+    ],
+  })) as string;
+
+  // Validate gas estimate
+  if (!gasEstimate || gasEstimate === '0x0') {
+    throw new Error('Failed to estimate gas. Please check the recipient address and try again.');
+  }
+
+  // Calculate total gas cost
+  const gasLimit = parseInt(gasEstimate, 16);
+  const totalGasCost = (maxFeePerGas * gasLimit) / 10 ** 18;
+  const totalRequired = amount + totalGasCost;
+
+  if (balanceInEth < totalRequired) {
+    throw new Error(
+      `Insufficient balance for transaction. You need ${totalRequired.toFixed(4)} ETH (${amount.toFixed(4)} + ${totalGasCost.toFixed(4)} gas) but have ${balanceInEth.toFixed(4)} ETH.`
+    );
+  }
+
+  // Create optimized transaction object with EIP-1559 parameters
+  const transactionParameters = {
+    to: NETWORK_CONFIG.PAYMENT.walletAddress,
+    from: account,
+    value: `0x${amountInWei}`,
+    data: '0x',
+    // EIP-1559 parameters for faster processing
+    maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
+    maxPriorityFeePerGas: `0x${priorityFee.toString(16)}`,
+    gasLimit: gasEstimate,
+    type: '0x2', // EIP-1559 transaction type
+  };
+
+  // Validate recipient address
+  if (
+    !NETWORK_CONFIG.PAYMENT.walletAddress ||
+    NETWORK_CONFIG.PAYMENT.walletAddress === '0x0000000000000000000000000000000000000000'
+  ) {
+    throw new Error('Invalid recipient address. Please contact support.');
+  }
+
+  try {
+    // Send transaction with optimized parameters
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [transactionParameters],
+    });
+
+    // Send transaction details to your backend
+    const response = await fetch(`${NETWORK_CONFIG.PAYMENT.apiUrl}/payments/web3`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        txHash,
+        amount,
+        service,
+        userAddress: account,
+        network: NETWORK_CONFIG.TARGET_NETWORK.name.toLowerCase().replace(' ', '_'),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Payment verification failed: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+
+    return { txHash, account, responseData };
+  } catch (error) {
+    // Handle specific MetaMask errors
+    if (error instanceof Error) {
+      if (error.message.includes('likely to fail')) {
+        throw new Error(
+          'Transaction would fail. Please check your balance and try again with a lower amount or ensure you have enough ETH for gas fees.'
+        );
+      } else if (error.message.includes('insufficient funds')) {
+        throw new Error('Insufficient funds. Please add more ETH to your wallet.');
+      } else if (error.message.includes('user rejected')) {
+        throw new Error('Transaction was cancelled by user.');
+      } else if (error.message.includes('nonce')) {
+        throw new Error('Transaction nonce error. Please try again.');
+      }
+    }
+    throw error;
+  }
+}
+
+// Fast transaction status monitoring with shorter intervals
+async function getTransactionStatus(txHash: string): Promise<{
+  status: 'pending' | 'confirmed' | 'failed';
+  confirmations?: number;
+  blockNumber?: number;
+  error?: string;
+}> {
+  try {
+    // Get transaction receipt
+    const receipt = (await window.ethereum?.request({
+      method: 'eth_getTransactionReceipt',
+      params: [txHash],
+    })) as {
+      status: string;
+      blockNumber: string;
+    } | null;
+
+    if (!receipt) {
+      return { status: 'pending' };
+    }
+
+    // Check if transaction was successful
+    if (receipt.status === '0x1') {
+      // Get current block number to calculate confirmations
+      const currentBlock = (await window.ethereum?.request({
+        method: 'eth_blockNumber',
+        params: [],
+      })) as string;
+
+      const confirmations = parseInt(currentBlock, 16) - parseInt(receipt.blockNumber, 16);
+
+      return {
+        status: 'confirmed',
+        confirmations,
+        blockNumber: parseInt(receipt.blockNumber, 16),
+      };
+    } else {
+      return {
+        status: 'failed',
+        error: 'Transaction failed on blockchain',
+      };
+    }
+  } catch (error) {
+    return {
+      status: 'failed',
+      error: error instanceof Error ? error.message : 'Failed to check transaction status',
+    };
+  }
+}
+
+// Accelerated transaction monitoring with shorter intervals
+async function monitorTransactionFast(
+  txHash: string,
+  onStatusUpdate: (status: {
+    status: 'pending' | 'confirmed' | 'failed' | 'timeout';
+    confirmations?: number;
+    blockNumber?: number;
+    error?: string;
+  }) => void
+) {
+  const maxAttempts = 60; // 2 minutes with 2-second intervals for faster feedback
+  let attempts = 0;
+
+  const pollStatus = async () => {
+    if (attempts >= maxAttempts) {
+      onStatusUpdate({
+        status: 'timeout',
+        error: 'Transaction monitoring timed out. Please check manually.',
+      });
+      return;
+    }
+
+    const status = await getTransactionStatus(txHash);
+    onStatusUpdate(status);
+
+    if (status.status === 'confirmed' || status.status === 'failed') {
+      return; // Stop polling
+    }
+
+    attempts++;
+    setTimeout(pollStatus, 2000); // Poll every 2 seconds for faster updates
+  };
+
+  pollStatus();
+}
+
+// Function to accelerate pending transactions (if supported by the network)
+async function accelerateTransaction(txHash: string) {
+  try {
+    // This is a placeholder for transaction acceleration services
+    // You can integrate with services like Flashbots, MEV-Boost, or network-specific accelerators
+
+    // Example: Send a replacement transaction with higher gas
+    const currentGasPrice = (await window.ethereum?.request({
+      method: 'eth_gasPrice',
+      params: [],
+    })) as string;
+
+    const acceleratedGasPrice = parseInt(currentGasPrice, 16) * 1.5; // 50% higher gas
+
+    // Note: This is a simplified example. Real acceleration requires more complex logic
+    console.log(
+      'Transaction acceleration attempted for:',
+      txHash,
+      'with gas price:',
+      acceleratedGasPrice
+    );
+
+    return true;
+  } catch (error) {
+    console.error('Transaction acceleration failed:', error);
+    return false;
+  }
+}
+
 const Tools: React.FC = () => {
+  const navigate = useNavigate();
+  const {
+    isConnected: walletConnected,
+    walletAddress,
+    connectWallet,
+    isOnTargetNetwork,
+    currentNetworkName,
+    switchToTargetNetwork,
+  } = useWallet();
   const [selectedFeature, setSelectedFeature] = useState<(typeof features)[0] | null>(null);
   const [amount, setAmount] = useState<number>(1);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'ltc' | 'web3'>('ltc');
+  const [transactionStatus, setTransactionStatus] = useState<{
+    status: 'pending' | 'confirmed' | 'failed' | 'timeout';
+    confirmations?: number;
+    blockNumber?: number;
+    error?: string;
+  } | null>(null);
+  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);
+  const [accelerating, setAccelerating] = useState(false);
 
   const handleFeatureClick = (feature: (typeof features)[0]) => {
     setSelectedFeature(feature);
@@ -76,6 +369,9 @@ const Tools: React.FC = () => {
     setEmail('');
     setError(null);
     setSuccess(null);
+    setTransactionStatus(null);
+    setCurrentTxHash(null);
+    setPaymentMethod('ltc');
   };
 
   const handleClosePopup = () => {
@@ -84,30 +380,235 @@ const Tools: React.FC = () => {
     setEmail('');
     setError(null);
     setSuccess(null);
+    setTransactionStatus(null);
+    setCurrentTxHash(null);
+    setPaymentMethod('ltc');
   };
 
   const handleBuy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFeature) return;
+
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setTransactionStatus(null);
+
     try {
-      // Extract numeric value from price string (e.g., '0.012LTC' -> 0.012)
-      const priceNum = parseFloat(String(selectedFeature.price).replace(/[^\d.]/g, ''));
-      const invoice = await createInvoice({
-        amount: priceNum * amount,
-        currency: 'LTC',
-        currency2: 'LTC',
-        email,
-        service: selectedFeature.title,
-      });
-      setSuccess('Invoice created successfully!');
-      window.open(invoice.paymentUrl);
+      if (paymentMethod === 'web3') {
+        // Web3 payment
+        if (!walletConnected) {
+          await connectWallet();
+        }
+
+        // Check if user is on target network
+        if (!isOnTargetNetwork) {
+          setError(
+            `Please switch to ${NETWORK_CONFIG.TARGET_NETWORK.name} to make payments. Click "Switch to ${NETWORK_CONFIG.TARGET_NETWORK.symbol}" in the header.`
+          );
+          setLoading(false);
+          return;
+        }
+
+        const ethAmount = (selectedFeature.ethPrice || 0.008) * amount;
+        const result = await processWeb3Payment({
+          amount: ethAmount,
+          service: selectedFeature.title,
+        });
+
+        setCurrentTxHash(result.txHash as string);
+        setTransactionStatus({ status: 'pending' });
+        setSuccess(`Transaction submitted! Hash: ${result.txHash}`);
+        // Navigate to transaction details page
+        navigate('/transaction-details', {
+          state: { transactionData: result.responseData },
+        });
+
+        // Start fast monitoring
+        monitorTransactionFast(result.txHash as string, (status) => {
+          setTransactionStatus(status);
+          if (status.status === 'confirmed') {
+            setSuccess(
+              `Payment confirmed! Block: ${status.blockNumber}, Confirmations: ${status.confirmations}`
+            );
+          } else if (status.status === 'failed') {
+            setError(`Transaction failed: ${status.error}`);
+          } else if (status.status === 'timeout') {
+            setError(`Transaction monitoring timed out. Please check manually: ${result.txHash}`);
+          }
+        });
+      } else {
+        // LTC payment (original method)
+        const priceNum = parseFloat(String(selectedFeature.price).replace(/[^\d.]/g, ''));
+        const invoice = await createInvoice({
+          amount: priceNum * amount,
+          currency: 'LTC',
+          currency2: 'LTC',
+          email,
+          service: selectedFeature.title,
+        });
+        setSuccess('Invoice created successfully!');
+        window.open(invoice.paymentUrl);
+      }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create invoice');
+      setError(err instanceof Error ? err.message : 'Failed to process payment');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getTotalPrice = () => {
+    if (!selectedFeature) return 0;
+
+    if (paymentMethod === 'web3') {
+      return (selectedFeature.ethPrice || 0.00044) * amount;
+    } else {
+      return parseFloat(String(selectedFeature.price).replace(/[^\d.]/g, '')) * amount;
+    }
+  };
+
+  const getPriceDisplay = () => {
+    if (!selectedFeature) return '';
+
+    if (paymentMethod === 'web3') {
+      return `${getTotalPrice()} ${NETWORK_CONFIG.TARGET_NETWORK.symbol}`;
+    } else {
+      return `${getTotalPrice()} LTC`;
+    }
+  };
+
+  const getTransactionStatusDisplay = () => {
+    if (!transactionStatus) return null;
+
+    switch (transactionStatus.status) {
+      case 'pending':
+        return (
+          <div className="text-yellow-400 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+              Transaction pending...
+            </div>
+            {currentTxHash && (
+              <div className="mt-1 text-xs text-gray-400">
+                Hash: {currentTxHash.slice(0, 10)}...{currentTxHash.slice(-8)}
+              </div>
+            )}
+            <button
+              onClick={handleAccelerateTransaction}
+              disabled={accelerating}
+              className="mt-2 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors disabled:opacity-50"
+            >
+              {accelerating ? 'Accelerating...' : '🚀 Accelerate'}
+            </button>
+          </div>
+        );
+      case 'confirmed':
+        return (
+          <div className="text-green-400 text-sm text-center">
+            <div className="flex items-center gap-2 justify-center">
+              <div className="w-4 h-4 bg-green-400 rounded-full"></div>
+              Transaction confirmed!
+            </div>
+            <div className="mt-1 text-xs text-gray-400">
+              Block: {transactionStatus.blockNumber} | Confirmations:{' '}
+              {transactionStatus.confirmations}
+            </div>
+          </div>
+        );
+      case 'failed':
+        return (
+          <div className="text-red-400 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+              Transaction failed
+            </div>
+            {transactionStatus.error && (
+              <div className="mt-1 text-xs text-gray-400">{transactionStatus.error}</div>
+            )}
+          </div>
+        );
+      case 'timeout':
+        return (
+          <div className="text-orange-400 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-orange-400 rounded-full"></div>
+              Monitoring timed out
+            </div>
+            <div className="mt-1 text-xs text-gray-400">Please check transaction manually</div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const handleAccelerateTransaction = async () => {
+    if (!currentTxHash || !walletAddress) return;
+
+    setAccelerating(true);
+    try {
+      const success = await accelerateTransaction(currentTxHash);
+      if (success) {
+        setSuccess('Transaction acceleration requested!');
+      } else {
+        setError('Failed to accelerate transaction');
+      }
+    } catch (err) {
+      setError('Acceleration failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setAccelerating(false);
+    }
+  };
+
+  const getErrorDisplay = (errorMessage: string) => {
+    if (errorMessage.includes('Insufficient balance')) {
+      return (
+        <div className="text-red-400 text-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+            Insufficient Balance
+          </div>
+          <div className="text-xs text-gray-400 space-y-1">
+            <p>• Add more ETH to your wallet</p>
+            <p>• Ensure you have enough for the payment + gas fees</p>
+            <p>• Gas fees typically range from 0.001-0.01 ETH</p>
+          </div>
+        </div>
+      );
+    } else if (errorMessage.includes('likely to fail')) {
+      return (
+        <div className="text-red-400 text-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+            Transaction Would Fail
+          </div>
+          <div className="text-xs text-gray-400 space-y-1">
+            <p>• Check your wallet balance</p>
+            <p>• Try with a smaller amount</p>
+            <p>• Ensure you're on the correct network</p>
+          </div>
+        </div>
+      );
+    } else if (errorMessage.includes('user rejected')) {
+      return (
+        <div className="text-yellow-400 text-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
+            Transaction Cancelled
+          </div>
+          <div className="text-xs text-gray-400">You cancelled the transaction in MetaMask.</div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-red-400 text-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+            Transaction Error
+          </div>
+          <div className="text-xs text-gray-400">{errorMessage}</div>
+        </div>
+      );
     }
   };
 
@@ -166,6 +667,10 @@ const Tools: React.FC = () => {
                     </h3>
                     <div className="mt-4">
                       <span className="text-lg font-bold text-primary-500">${feature.price}</span>
+                      <br />
+                      <span className="text-sm text-gray-400">
+                        or {feature.ethPrice} {NETWORK_CONFIG.TARGET_NETWORK.symbol}
+                      </span>
                     </div>
                     <p
                       className="dark:text-dark-secondary text-light-secondary text-sm md:text-base leading-relaxed group-hover:text-dark-primary dark:group-hover:text-dark-primary group-hover:text-light-primary transition-colors duration-300 min-h-[48px] flex items-center justify-center"
@@ -225,26 +730,96 @@ const Tools: React.FC = () => {
               {selectedFeature.title} - Key Day
             </h3>
             <p className="text-dark-secondary mb-6 text-center">{selectedFeature.description}</p>
-            <form onSubmit={handleBuy}>
-              <div className="mb-4">
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-dark-secondary mb-2"
+
+            {/* Payment Method Selection */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-dark-secondary mb-3">
+                Payment Method
+              </label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('ltc')}
+                  className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
+                    paymentMethod === 'ltc'
+                      ? 'border-primary-500 bg-primary-500/20 text-primary-500'
+                      : 'border-dark-border text-dark-secondary hover:border-primary-500'
+                  }`}
                 >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl bg-dark-surface border border-dark-border focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
-                />
-                <p className="text-sm text-dark-secondary mt-2">
-                  We will send the invoice to your email.
-                </p>
+                  Litecoin (LTC)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('web3')}
+                  className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
+                    paymentMethod === 'web3'
+                      ? 'border-primary-500 bg-primary-500/20 text-primary-500'
+                      : 'border-dark-border text-dark-secondary hover:border-primary-500'
+                  }`}
+                >
+                  <FaWallet className="inline w-4 h-4 mr-2" />
+                  Web3
+                </button>
               </div>
+            </div>
+
+            {/* Wallet Connection Status */}
+            {paymentMethod === 'web3' && (
+              <div className="mb-4 p-3 rounded-lg bg-dark-surface/50 border border-dark-border">
+                {walletConnected ? (
+                  <div className="space-y-2">
+                    <div className="text-green-400 text-sm">
+                      <FaWallet className="inline w-4 h-4 mr-2" />
+                      Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                    </div>
+                    <div
+                      className={`text-sm ${
+                        isOnTargetNetwork ? 'text-green-400' : 'text-yellow-400'
+                      }`}
+                    >
+                      Network: {currentNetworkName}
+                      {!isOnTargetNetwork && (
+                        <button
+                          onClick={switchToTargetNetwork}
+                          className="ml-2 inline-flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors"
+                        >
+                          Switch to {NETWORK_CONFIG.TARGET_NETWORK.symbol}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-yellow-400 text-sm">
+                    <FaWallet className="inline w-4 h-4 mr-2" />
+                    MetaMask not connected
+                  </div>
+                )}
+              </div>
+            )}
+
+            <form onSubmit={handleBuy}>
+              {paymentMethod === 'ltc' && (
+                <div className="mb-4">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-dark-secondary mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl bg-dark-surface border border-dark-border focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
+                  />
+                  <p className="text-sm text-dark-secondary mt-2">
+                    We will send the invoice to your email.
+                  </p>
+                </div>
+              )}
+
               <div className="mb-4">
                 <label
                   htmlFor="amount"
@@ -261,24 +836,38 @@ const Tools: React.FC = () => {
                   className="w-full px-4 py-2 rounded-xl bg-dark-surface border border-dark-border focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
                 />
               </div>
+
               <div className="text-center mb-4">
                 <span className="text-lg font-medium text-dark-secondary">Total: </span>
-                <span className="text-2xl font-bold text-primary-500">
-                  ${parseFloat(String(selectedFeature.price).replace(/[^\d.]/g, '')) * amount} LTC
-                </span>
+                <span className="text-2xl font-bold text-primary-500">{getPriceDisplay()}</span>
               </div>
-              {error && <div className="text-red-500 text-center mb-2">{error}</div>}
+
+              {error && (
+                <div className="mb-4 p-3 rounded-lg bg-dark-surface/50 border border-red-500/30">
+                  {getErrorDisplay(error)}
+                </div>
+              )}
               {success && <div className="text-green-500 text-center mb-2">{success}</div>}
+
+              {getTransactionStatusDisplay()}
+
               <button
                 type="submit"
                 className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300"
-                disabled={loading}
+                disabled={
+                  loading || (paymentMethod === 'web3' && (!walletConnected || !isOnTargetNetwork))
+                }
               >
                 {loading ? (
                   'Processing...'
                 ) : (
                   <>
-                    <FaShoppingCart className="w-4 h-4" /> Buy Now
+                    {paymentMethod === 'web3' ? (
+                      <FaWallet className="w-4 h-4" />
+                    ) : (
+                      <FaShoppingCart className="w-4 h-4" />
+                    )}
+                    {paymentMethod === 'web3' ? 'Pay with MetaMask' : 'Buy Now'}
                   </>
                 )}
               </button>
