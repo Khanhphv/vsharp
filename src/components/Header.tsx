@@ -124,13 +124,13 @@ const Header: React.FC = () => {
             </button>
 
             <a
-              href={DISCORD_INVITE}
+              href={'/tools'}
               target="_blank"
               rel="noopener noreferrer"
               className="relative bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/40 group overflow-hidden animate-glow"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span className="relative z-10">Get Started</span>
+              <span className="relative z-10">Buy Now</span>
             </a>
           </nav>
 
@@ -184,13 +184,13 @@ const Header: React.FC = () => {
                 <span className="relative z-10">About</span>
               </button>
               <a
-                href={DISCORD_INVITE}
+                href={'/tools'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-6 py-4 rounded-2xl text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/40 mx-4 mt-4 group overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <span className="relative z-10">Get Started</span>
+                <span className="relative z-10">Buy Now</span>
               </a>
             </nav>
           </div>
