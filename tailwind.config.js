@@ -159,6 +159,17 @@ export default {
             boxShadow: '0 0 20px rgba(173, 67, 243, 0.8), 0 0 40px rgba(173, 67, 243, 0.5)',
           },
         },
+        shake: {
+          '0%, 100%': {
+            transform: 'translateX(0)',
+          },
+          '10%, 30%, 50%, 70%, 90%': {
+            transform: 'translateX(-2px)',
+          },
+          '20%, 40%, 60%, 80%': {
+            transform: 'translateX(2px)',
+          },
+        },
       },
       animation: {
         'slide-up-from-bottom': 'slide-up-from-bottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards',
@@ -170,6 +181,7 @@ export default {
         shimmer: 'shimmer 2s linear infinite',
         gradient: 'gradient 8s linear infinite',
         glow: 'glow 2s ease-in-out infinite',
+        shake: 'shake 0.5s ease-in-out infinite',
       },
     },
   },

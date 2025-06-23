@@ -93,7 +93,11 @@ const WalletConnect: React.FC<{ className?: string }> = ({ className }) => {
       >
         {isConnecting ? 'Connecting...' : 'Connect Wallet'}
       </button> */}
-      <button onClick={connectWallet} disabled={isConnecting}>
+      <button
+        onClick={connectWallet}
+        disabled={isConnecting}
+        className="animate-shake hover:animate-none transition-all duration-300 hover:scale-110"
+      >
         <img src={MetaMask} alt="MetaMask" className="w-10 h-10" />
         {error && <p className="text-sm text-red-500">{error}</p>}
       </button>
