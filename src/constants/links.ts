@@ -7,3 +7,10 @@ export const LINKS = {
 } as const;
 
 export const DISCORD_INVITE = LINKS.DISCORD.INVITE;
+
+export const ROUTES = {
+  LOGO: '/home',
+  HOME: '/home',
+  TOOLS: '/tools',
+  TRANSACTION_DETAILS: '/transaction-details',
+} as const;

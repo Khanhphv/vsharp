@@ -350,33 +350,6 @@ async function hashTransactionParams(params: {
   return await hashTransaction(paramString);
 }
 
-// Create transaction signature hash (EIP-155 style)
-async function createTransactionHash(params: {
-  nonce: string;
-  gasPrice: string;
-  gasLimit: string;
-  to: string;
-  value: string;
-  data: string;
-  chainId: number;
-}): Promise<string> {
-  // RLP encoding would be needed for proper EIP-155 hashing
-  // This is a simplified version
-  const encoded = [
-    params.nonce,
-    params.gasPrice,
-    params.gasLimit,
-    params.to,
-    params.value,
-    params.data,
-    params.chainId,
-    '0x', // r
-    '0x', // s
-  ].join('');
-
-  return await hashTransaction(encoded);
-}
-
 const Tools: React.FC = () => {
   const navigate = useNavigate();
   const {
@@ -600,26 +573,6 @@ const Tools: React.FC = () => {
     }
   };
 
-  // Demo function to show transaction hashing
-  const demonstrateTransactionHashing = async () => {
-    try {
-      const demoParams = {
-        nonce: '0x0',
-        gasPrice: '0x09184e72a000',
-        gasLimit: '0x27100',
-        to: NETWORK_CONFIG.PAYMENT.walletAddress,
-        value: '0x00',
-        data: '0x',
-        chainId: 1,
-      };
-
-      const demoHash = await createTransactionHash(demoParams);
-      console.log('Demo transaction hash:', demoHash);
-    } catch (error) {
-      console.error('Demo hashing failed:', error);
-    }
-  };
-
   const getErrorDisplay = (errorMessage: string) => {
     if (errorMessage.includes('Insufficient balance')) {
       return (
@@ -673,7 +626,7 @@ const Tools: React.FC = () => {
   };
 
   return (
-    <div className="pt-24 dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20">
+    <div className="pt-10 dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20">
       <section
         id="features"
         className="dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20 cursor-default"

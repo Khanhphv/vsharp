@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import WalletConnect from './WalletConnect';
+import { ROUTES } from '../constants/links';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ const Header: React.FC = () => {
       <div className="mx-auto w-full lg:max-w-[64rem] px-4 relative">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link
-            to="/"
+            to={ROUTES.LOGO}
             className="text-2xl md:text-3xl font-bold dark:text-dark-primary text-light-primary flex items-center group"
           >
             <div className="relative mr-3">
@@ -99,7 +100,7 @@ const Header: React.FC = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-2">
             <button
-              onClick={() => smoothScrollTo('hero')}
+              onClick={() => navigate(ROUTES.LOGO)}
               className="relative dark:text-dark-primary text-light-primary hover:text-primary-400 px-6 py-3 rounded-2xl transition-all duration-300 hover:scale-105 group overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
@@ -123,14 +124,14 @@ const Header: React.FC = () => {
               <span className="relative z-10">About</span>
             </button>
 
-            <a
-              href={'/tools'}
+            <button
+              onClick={() => navigate(ROUTES.TOOLS)}
               rel="noopener noreferrer"
               className="relative bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/40 group overflow-hidden animate-glow"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <span className="relative z-10">Buy Now</span>
-            </a>
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}

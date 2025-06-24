@@ -6,10 +6,12 @@ import TransactionDetails from './pages/TransactionDetails';
 import { ThemeProvider } from './context/ThemeContext';
 import { WalletProvider } from './context/WalletContext';
 import SplashScreen from './components/SplashScreen';
-import Header from './components/Header';
 import Footer from './components/Footer';
 import SEOHead from './components/SEOHead';
 import WalletConnect from './components/WalletConnect';
+import MainLayout from './components/layouts/MainLayout';
+import LogoLayout from './components/layouts/LogoLayout';
+import Coor from './pages/Coor';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -58,16 +60,17 @@ function App() {
 
             <div className="min-h-screen flex flex-col">
               <SEOHead />
-              <Header />
-              <main className="flex-grow">
-                <div className="min-h-screen flex flex-col">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/tools" element={<Tools />} />
-                    <Route path="/transaction-details" element={<TransactionDetails />} />
-                  </Routes>
-                </div>
-              </main>
+              <Routes>
+                <Route element={<LogoLayout />}>
+                  <Route path="/tools" element={<Tools />} />
+                </Route>
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<Coor />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/transaction-details" element={<TransactionDetails />} />
+                </Route>
+              </Routes>
+
               <Footer />
             </div>
           </div>
