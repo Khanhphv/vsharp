@@ -852,6 +852,12 @@ const Tools: React.FC = () => {
                   <div className="text-yellow-400 text-sm">
                     <FaWallet className="inline w-4 h-4 mr-2" />
                     MetaMask not connected
+                    <button
+                      onClick={connectWallet}
+                      className="ml-2 inline-flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors"
+                    >
+                      Connect Wallet
+                    </button>
                   </div>
                 )}
               </div>
