@@ -13,7 +13,7 @@ export const SEO_CONFIG = {
 
   // Analytics IDs (replace with actual IDs)
   analytics: {
-    googleAnalyticsId: 'G-25T926GFWF', // Replace with your GA4 ID
+    googleAnalyticsId: 'G-52E9JY19JG', // Replace with your GA4 ID
     googleTagManagerId: 'GTM-N7TBW7X5', // Replace with your GTM ID
   },
 
