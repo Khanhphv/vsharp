@@ -125,7 +125,6 @@ const Header: React.FC = () => {
 
             <a
               href={'/tools'}
-              target="_blank"
               rel="noopener noreferrer"
               className="relative bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/40 group overflow-hidden animate-glow"
             >
@@ -185,7 +184,6 @@ const Header: React.FC = () => {
               </button>
               <a
                 href={'/tools'}
-                target="_blank"
                 rel="noopener noreferrer"
                 className="relative bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-6 py-4 rounded-2xl text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/40 mx-4 mt-4 group overflow-hidden"
               >
