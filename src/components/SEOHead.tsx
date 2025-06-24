@@ -18,6 +18,8 @@ interface SEOHeadProps {
   noIndex?: boolean;
   noFollow?: boolean;
   structuredData?: object;
+  googleAnalyticsId?: string;
+  googleTagManagerId?: string;
 }
 
 const SEOHead: React.FC<SEOHeadProps> = ({
@@ -38,6 +40,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   noIndex = false,
   noFollow = false,
   structuredData,
+  googleAnalyticsId,
+  googleTagManagerId,
 }) => {
   useEffect(() => {
     // Update document title
@@ -85,6 +89,10 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     updateMetaTag('copyright', `${author} ${new Date().getFullYear()}`);
     updateMetaTag('category', 'Gaming, Software, Entertainment');
 
+    // Enhanced search engine meta tags
+    updateMetaTag('googlebot', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+    updateMetaTag('bingbot', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+
     // Open Graph tags
     updateMetaTag('og:title', title, true);
     updateMetaTag('og:description', description, true);
@@ -94,6 +102,10 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     updateMetaTag('og:type', type, true);
     updateMetaTag('og:site_name', siteName, true);
     updateMetaTag('og:locale', locale, true);
+    updateMetaTag('og:image:secure_url', image, true);
+    updateMetaTag('og:image:type', 'image/png', true);
+    updateMetaTag('og:image:width', '1200', true);
+    updateMetaTag('og:image:height', '630', true);
 
     if (publishedTime) {
       updateMetaTag('article:published_time', publishedTime, true);
@@ -127,6 +139,11 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     updateMetaTag('twitter:image:alt', `${siteName} - Premium Game Cheats and Hacks Platform`);
     updateMetaTag('twitter:url', url);
 
+    // Enhanced Twitter meta tags
+    updateMetaTag('twitter:app:name:iphone', siteName);
+    updateMetaTag('twitter:app:name:ipad', siteName);
+    updateMetaTag('twitter:app:name:googleplay', siteName);
+
     // Additional meta tags for better SEO
     updateMetaTag('theme-color', '#ad43f3');
     updateMetaTag('msapplication-TileColor', '#ad43f3');
@@ -149,6 +166,43 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       hrefLang.setAttribute('hreflang', 'en');
       hrefLang.setAttribute('href', url);
       document.head.appendChild(hrefLang);
+    }
+
+    // Add Google Analytics if provided
+    if (googleAnalyticsId) {
+      const gaScript = document.createElement('script');
+      gaScript.async = true;
+      gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`;
+      document.head.appendChild(gaScript);
+
+      const gaConfig = document.createElement('script');
+      gaConfig.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${googleAnalyticsId}');
+      `;
+      document.head.appendChild(gaConfig);
+    }
+
+    // Add Google Tag Manager if provided
+    if (googleTagManagerId) {
+      const gtmScript = document.createElement('script');
+      gtmScript.innerHTML = `
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','${googleTagManagerId}');
+      `;
+      document.head.appendChild(gtmScript);
+
+      const gtmNoscript = document.createElement('noscript');
+      gtmNoscript.innerHTML = `
+        <iframe src="https://www.googletagmanager.com/ns.html?id=${googleTagManagerId}"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe>
+      `;
+      document.body.appendChild(gtmNoscript);
     }
 
     // Add structured data if provided
@@ -176,6 +230,15 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       if (structuredScript) {
         structuredScript.remove();
       }
+
+      // Remove analytics scripts
+      const gaScripts = document.querySelectorAll('script[src*="googletagmanager"]');
+      gaScripts.forEach((script) => script.remove());
+
+      const gtmNoscript = document.querySelector('noscript iframe[src*="googletagmanager"]');
+      if (gtmNoscript?.parentElement) {
+        gtmNoscript.parentElement.remove();
+      }
     };
   }, [
     title,
@@ -195,6 +258,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     noIndex,
     noFollow,
     structuredData,
+    googleAnalyticsId,
+    googleTagManagerId,
   ]);
 
   return null;
