@@ -7,7 +7,6 @@ import { ThemeProvider } from './context/ThemeContext';
 import { WalletProvider } from './context/WalletContext';
 import SplashScreen from './components/SplashScreen';
 import Footer from './components/Footer';
-import SEOHead from './components/SEOHead';
 import WalletConnect from './components/WalletConnect';
 import MainLayout from './components/layouts/MainLayout';
 import LogoLayout from './components/layouts/LogoLayout';
@@ -59,7 +58,6 @@ function App() {
             </div>
 
             <div className="min-h-screen flex flex-col">
-              <SEOHead />
               <Routes>
                 <Route element={<LogoLayout />}>
                   <Route path="/tools" element={<Tools />} />

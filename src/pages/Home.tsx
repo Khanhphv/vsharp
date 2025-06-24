@@ -7,11 +7,28 @@ import Footer from '../components/Footer';
 import SEOHead from '../components/SEOHead';
 import FAQ from '../components/FAQ';
 import DiscordCommunity from '../components/DiscordCommunity';
+import { getSEOConfig, getStructuredData, SEO_CONFIG } from '../config/seo';
 
 const Home: React.FC = () => {
+  const seoConfig = getSEOConfig('home');
+  const structuredData = [
+    getStructuredData('organization'),
+    getStructuredData('website'),
+    getStructuredData('breadcrumbList'),
+    getStructuredData('faqPage')
+  ];
+
   return (
     <>
-      <SEOHead />
+      <SEOHead 
+        title={seoConfig.title}
+        description={seoConfig.description}
+        keywords={seoConfig.keywords}
+        url={seoConfig.url}
+        structuredData={structuredData}
+        googleAnalyticsId={SEO_CONFIG.analytics.googleAnalyticsId}
+        googleTagManagerId={SEO_CONFIG.analytics.googleTagManagerId}
+      />
       <Header />
       <main className="flex-grow">
         <Hero />

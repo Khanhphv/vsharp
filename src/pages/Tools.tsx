@@ -3,6 +3,8 @@ import { FaRocket, FaShoppingCart, FaWallet } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../../src/context/WalletContext';
 import { NETWORK_CONFIG } from '../config/networks';
+import SEOHead from '../components/SEOHead';
+import { getSEOConfig, getStructuredData, SEO_CONFIG } from '../config/seo';
 
 // Web3 types
 interface EthereumProvider {
@@ -376,6 +378,13 @@ const Tools: React.FC = () => {
   const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);
   const [accelerating, setAccelerating] = useState(false);
 
+  // SEO Configuration
+  const seoConfig = getSEOConfig('tools');
+  const structuredData = [
+    getStructuredData('organization'),
+    getStructuredData('breadcrumbList')
+  ];
+
   const handleFeatureClick = (feature: (typeof features)[0]) => {
     setSelectedFeature(feature);
     setAmount(1);
@@ -626,275 +635,286 @@ const Tools: React.FC = () => {
   };
 
   return (
-    <div className="pt-10 dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20">
-      <section
-        id="features"
-        className="dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20 cursor-default"
-      >
-        <div className="mx-auto w-full lg:max-w-[64rem] px-4">
-          <header className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-4xl font-bold dark:text-dark-primary text-light-primary">
-              Tools
-            </h2>
-            <p className="text-lg md:text-xl dark:text-dark-secondary text-light-secondary mt-4 max-w-2xl mx-auto">
-              Experience premium gaming advantages with our trusted platform
-            </p>
-          </header>
-          <section
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-12"
-            role="region"
-            aria-label="Platform features"
-          >
-            {features.map((feature, index) => (
-              <article
-                key={index}
-                onClick={() => handleFeatureClick(feature)}
-                className="group relative flex flex-col justify-between text-center p-8 rounded-3xl bg-gradient-to-br from-dark-surface/80 to-dark-surface/40 dark:from-dark-surface/80 dark:to-dark-surface/40 from-light-surface/80 to-light-surface/40 backdrop-blur-sm border border-dark-border/30 dark:border-dark-border/30 border-light-border/30 hover:border-primary-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/20 overflow-hidden cursor-pointer h-full min-h-[420px]"
-                itemScope
-                itemType="https://schema.org/Service"
-              >
-                {feature.isSale && (
-                  <div className="absolute top-4 left-4 z-20">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white animate-pulse">
-                      SALE
-                    </span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary-500/20 via-purple-500/20 to-primary-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
-                <div className="relative z-10 flex flex-col flex-1">
-                  <div>
-                    <div className="flex justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
-                      <div
-                        className="p-4 rounded-2xl bg-gradient-to-br from-primary-500/20 to-purple-600/20 group-hover:from-primary-500/30 group-hover:to-purple-600/30 transition-all duration-500"
-                        aria-hidden="true"
-                      >
-                        {feature.icon}
-                      </div>
-                    </div>
-                    <h3
-                      className="text-lg md:text-xl font-bold mb-3 dark:text-dark-primary text-light-primary group-hover:text-primary-400 transition-colors duration-300"
-                      itemProp="name"
-                    >
-                      {feature.title}
-                    </h3>
-                    <div className="mt-4">
-                      <span className="text-lg font-bold text-primary-500">${feature.price}</span>
-                      <br />
-                      <span className="text-sm text-gray-400">
-                        or {feature.ethPrice} {NETWORK_CONFIG.TARGET_NETWORK.symbol}
+    <>
+      <SEOHead 
+        title={seoConfig.title}
+        description={seoConfig.description}
+        keywords={seoConfig.keywords}
+        url={seoConfig.url}
+        structuredData={structuredData}
+        googleAnalyticsId={SEO_CONFIG.analytics.googleAnalyticsId}
+        googleTagManagerId={SEO_CONFIG.analytics.googleTagManagerId}
+      />
+      <div className="pt-10 dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20">
+        <section
+          id="features"
+          className="dark:bg-dark-bg bg-light-bg dark:text-dark-primary text-light-primary py-12 md:py-20 cursor-default"
+        >
+          <div className="mx-auto w-full lg:max-w-[64rem] px-4">
+            <header className="text-center mb-8 md:mb-12">
+              <h2 className="text-2xl md:text-4xl font-bold dark:text-dark-primary text-light-primary">
+                Tools
+              </h2>
+              <p className="text-lg md:text-xl dark:text-dark-secondary text-light-secondary mt-4 max-w-2xl mx-auto">
+                Experience premium gaming advantages with our trusted platform
+              </p>
+            </header>
+            <section
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-12"
+              role="region"
+              aria-label="Platform features"
+            >
+              {features.map((feature, index) => (
+                <article
+                  key={index}
+                  onClick={() => handleFeatureClick(feature)}
+                  className="group relative flex flex-col justify-between text-center p-8 rounded-3xl bg-gradient-to-br from-dark-surface/80 to-dark-surface/40 dark:from-dark-surface/80 dark:to-dark-surface/40 from-light-surface/80 to-light-surface/40 backdrop-blur-sm border border-dark-border/30 dark:border-dark-border/30 border-light-border/30 hover:border-primary-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/20 overflow-hidden cursor-pointer h-full min-h-[420px]"
+                  itemScope
+                  itemType="https://schema.org/Service"
+                >
+                  {feature.isSale && (
+                    <div className="absolute top-4 left-4 z-20">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white animate-pulse">
+                        SALE
                       </span>
                     </div>
-                    <p
-                      className="dark:text-dark-secondary text-light-secondary text-sm md:text-base leading-relaxed group-hover:text-dark-primary dark:group-hover:text-dark-primary group-hover:text-light-primary transition-colors duration-300 min-h-[48px] flex items-center justify-center"
-                      itemProp="description"
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary-500/20 via-purple-500/20 to-primary-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+                  <div className="relative z-10 flex flex-col flex-1">
+                    <div>
+                      <div className="flex justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
+                        <div
+                          className="p-4 rounded-2xl bg-gradient-to-br from-primary-500/20 to-purple-600/20 group-hover:from-primary-500/30 group-hover:to-purple-600/30 transition-all duration-500"
+                          aria-hidden="true"
+                        >
+                          {feature.icon}
+                        </div>
+                      </div>
+                      <h3
+                        className="text-lg md:text-xl font-bold mb-3 dark:text-dark-primary text-light-primary group-hover:text-primary-400 transition-colors duration-300"
+                        itemProp="name"
+                      >
+                        {feature.title}
+                      </h3>
+                      <div className="mt-4">
+                        <span className="text-lg font-bold text-primary-500">${feature.price}</span>
+                        <br />
+                        <span className="text-sm text-gray-400">
+                          or {feature.ethPrice} {NETWORK_CONFIG.TARGET_NETWORK.symbol}
+                        </span>
+                      </div>
+                      <p
+                        className="dark:text-dark-secondary text-light-secondary text-sm md:text-base leading-relaxed group-hover:text-dark-primary dark:group-hover:text-dark-primary group-hover:text-light-primary transition-colors duration-300 min-h-[48px] flex items-center justify-center"
+                        itemProp="description"
+                      >
+                        {feature.description}
+                      </p>
+                    </div>
+                    <div className="mt-auto pt-6">
+                      <button
+                        className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 group-hover:scale-105"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFeatureClick(feature);
+                        }}
+                      >
+                        <FaShoppingCart className="w-4 h-4" />
+                        Buy Now
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    className="absolute top-4 right-4 w-2 h-2 bg-primary-500/30 rounded-full animate-pulse"
+                    aria-hidden="true"
+                  ></div>
+                  <div
+                    className="absolute bottom-6 left-6 w-1 h-1 bg-purple-500/40 rounded-full animate-ping"
+                    aria-hidden="true"
+                  ></div>
+                </article>
+              ))}
+            </section>
+          </div>
+        </section>
+        {/* Popup for buying */}
+        {selectedFeature && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+            onClick={handleClosePopup}
+          >
+            <div
+              className="bg-dark-surface p-8 rounded-3xl max-w-md w-full mx-4 transform transition-all relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                onClick={handleClosePopup}
+              >
+                &times;
+              </button>
+              <div className="flex justify-center mb-6">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary-500/20 to-purple-600/20">
+                  {selectedFeature.icon}
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-center mb-4">
+                {selectedFeature.title} - Key Day
+              </h3>
+              <p className="text-dark-secondary mb-6 text-center">{selectedFeature.description}</p>
+
+              {/* Payment Method Selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-dark-secondary mb-3">
+                  Payment Method
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('ltc')}
+                    className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
+                      paymentMethod === 'ltc'
+                        ? 'border-primary-500 bg-primary-500/20 text-primary-500'
+                        : 'border-dark-border text-dark-secondary hover:border-primary-500'
+                    }`}
+                  >
+                    Litecoin (LTC)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('web3')}
+                    className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
+                      paymentMethod === 'web3'
+                        ? 'border-primary-500 bg-primary-500/20 text-primary-500'
+                        : 'border-dark-border text-dark-secondary hover:border-primary-500'
+                    }`}
+                  >
+                    <FaWallet className="inline w-4 h-4 mr-2" />
+                    Web3
+                  </button>
+                </div>
+              </div>
+
+              {/* Wallet Connection Status */}
+              {paymentMethod === 'web3' && (
+                <div className="mb-4 p-3 rounded-lg bg-dark-surface/50 border border-dark-border">
+                  {walletConnected ? (
+                    <div className="space-y-2">
+                      <div className="text-green-400 text-sm">
+                        <FaWallet className="inline w-4 h-4 mr-2" />
+                        Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                      </div>
+                      <div
+                        className={`text-sm ${
+                          isOnTargetNetwork ? 'text-green-400' : 'text-yellow-400'
+                        }`}
+                      >
+                        Network: {currentNetworkName}
+                        {!isOnTargetNetwork && (
+                          <button
+                            onClick={switchToTargetNetwork}
+                            className="ml-2 inline-flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors"
+                          >
+                            Switch to {NETWORK_CONFIG.TARGET_NETWORK.symbol}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-yellow-400 text-sm">
+                      <FaWallet className="inline w-4 h-4 mr-2" />
+                      MetaMask not connected
+                      <button
+                        onClick={connectWallet}
+                        className="ml-2 inline-flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors"
+                      >
+                        Connect Wallet
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <form onSubmit={handleBuy}>
+                {paymentMethod === 'ltc' && (
+                  <div className="mb-4">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-dark-secondary mb-2"
                     >
-                      {feature.description}
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl bg-dark-surface border border-dark-border focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
+                    />
+                    <p className="text-sm text-dark-secondary mt-2">
+                      We will send the invoice to your email.
                     </p>
                   </div>
-                  <div className="mt-auto pt-6">
-                    <button
-                      className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300 group-hover:scale-105"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFeatureClick(feature);
-                      }}
-                    >
-                      <FaShoppingCart className="w-4 h-4" />
-                      Buy Now
-                    </button>
-                  </div>
-                </div>
-                <div
-                  className="absolute top-4 right-4 w-2 h-2 bg-primary-500/30 rounded-full animate-pulse"
-                  aria-hidden="true"
-                ></div>
-                <div
-                  className="absolute bottom-6 left-6 w-1 h-1 bg-purple-500/40 rounded-full animate-ping"
-                  aria-hidden="true"
-                ></div>
-              </article>
-            ))}
-          </section>
-        </div>
-      </section>
-      {/* Popup for buying */}
-      {selectedFeature && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-          onClick={handleClosePopup}
-        >
-          <div
-            className="bg-dark-surface p-8 rounded-3xl max-w-md w-full mx-4 transform transition-all relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
-              onClick={handleClosePopup}
-            >
-              &times;
-            </button>
-            <div className="flex justify-center mb-6">
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary-500/20 to-purple-600/20">
-                {selectedFeature.icon}
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-center mb-4">
-              {selectedFeature.title} - Key Day
-            </h3>
-            <p className="text-dark-secondary mb-6 text-center">{selectedFeature.description}</p>
-
-            {/* Payment Method Selection */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-dark-secondary mb-3">
-                Payment Method
-              </label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('ltc')}
-                  className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
-                    paymentMethod === 'ltc'
-                      ? 'border-primary-500 bg-primary-500/20 text-primary-500'
-                      : 'border-dark-border text-dark-secondary hover:border-primary-500'
-                  }`}
-                >
-                  Litecoin (LTC)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('web3')}
-                  className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
-                    paymentMethod === 'web3'
-                      ? 'border-primary-500 bg-primary-500/20 text-primary-500'
-                      : 'border-dark-border text-dark-secondary hover:border-primary-500'
-                  }`}
-                >
-                  <FaWallet className="inline w-4 h-4 mr-2" />
-                  Web3
-                </button>
-              </div>
-            </div>
-
-            {/* Wallet Connection Status */}
-            {paymentMethod === 'web3' && (
-              <div className="mb-4 p-3 rounded-lg bg-dark-surface/50 border border-dark-border">
-                {walletConnected ? (
-                  <div className="space-y-2">
-                    <div className="text-green-400 text-sm">
-                      <FaWallet className="inline w-4 h-4 mr-2" />
-                      Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                    </div>
-                    <div
-                      className={`text-sm ${
-                        isOnTargetNetwork ? 'text-green-400' : 'text-yellow-400'
-                      }`}
-                    >
-                      Network: {currentNetworkName}
-                      {!isOnTargetNetwork && (
-                        <button
-                          onClick={switchToTargetNetwork}
-                          className="ml-2 inline-flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors"
-                        >
-                          Switch to {NETWORK_CONFIG.TARGET_NETWORK.symbol}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-yellow-400 text-sm">
-                    <FaWallet className="inline w-4 h-4 mr-2" />
-                    MetaMask not connected
-                    <button
-                      onClick={connectWallet}
-                      className="ml-2 inline-flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors"
-                    >
-                      Connect Wallet
-                    </button>
-                  </div>
                 )}
-              </div>
-            )}
 
-            <form onSubmit={handleBuy}>
-              {paymentMethod === 'ltc' && (
                 <div className="mb-4">
                   <label
-                    htmlFor="email"
+                    htmlFor="amount"
                     className="block text-sm font-medium text-dark-secondary mb-2"
                   >
-                    Email
+                    Amount
                   </label>
                   <input
-                    type="email"
-                    id="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="number"
+                    id="amount"
+                    min="1"
+                    value={amount}
+                    onChange={(e) => setAmount(Number(e.target.value))}
                     className="w-full px-4 py-2 rounded-xl bg-dark-surface border border-dark-border focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
                   />
-                  <p className="text-sm text-dark-secondary mt-2">
-                    We will send the invoice to your email.
-                  </p>
                 </div>
-              )}
 
-              <div className="mb-4">
-                <label
-                  htmlFor="amount"
-                  className="block text-sm font-medium text-dark-secondary mb-2"
-                >
-                  Amount
-                </label>
-                <input
-                  type="number"
-                  id="amount"
-                  min="1"
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
-                  className="w-full px-4 py-2 rounded-xl bg-dark-surface border border-dark-border focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
-                />
-              </div>
-
-              <div className="text-center mb-4">
-                <span className="text-lg font-medium text-dark-secondary">Total: </span>
-                <span className="text-2xl font-bold text-primary-500">{getPriceDisplay()}</span>
-              </div>
-
-              {error && (
-                <div className="mb-4 p-3 rounded-lg bg-dark-surface/50 border border-red-500/30">
-                  {getErrorDisplay(error)}
+                <div className="text-center mb-4">
+                  <span className="text-lg font-medium text-dark-secondary">Total: </span>
+                  <span className="text-2xl font-bold text-primary-500">{getPriceDisplay()}</span>
                 </div>
-              )}
-              {success && <div className="text-green-500 text-center mb-2">{success}</div>}
 
-              {getTransactionStatusDisplay()}
-
-              <button
-                type="submit"
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300"
-                disabled={
-                  loading || (paymentMethod === 'web3' && (!walletConnected || !isOnTargetNetwork))
-                }
-              >
-                {loading ? (
-                  'Processing...'
-                ) : (
-                  <>
-                    {paymentMethod === 'web3' ? (
-                      <FaWallet className="w-4 h-4" />
-                    ) : (
-                      <FaShoppingCart className="w-4 h-4" />
-                    )}
-                    {paymentMethod === 'web3' ? 'Pay with MetaMask' : 'Buy Now'}
-                  </>
+                {error && (
+                  <div className="mb-4 p-3 rounded-lg bg-dark-surface/50 border border-red-500/30">
+                    {getErrorDisplay(error)}
+                  </div>
                 )}
-              </button>
-            </form>
+                {success && <div className="text-green-500 text-center mb-2">{success}</div>}
+
+                {getTransactionStatusDisplay()}
+
+                <button
+                  type="submit"
+                  className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300"
+                  disabled={
+                    loading || (paymentMethod === 'web3' && (!walletConnected || !isOnTargetNetwork))
+                  }
+                >
+                  {loading ? (
+                    'Processing...'
+                  ) : (
+                    <>
+                      {paymentMethod === 'web3' ? (
+                        <FaWallet className="w-4 h-4" />
+                      ) : (
+                        <FaShoppingCart className="w-4 h-4" />
+                      )}
+                      {paymentMethod === 'web3' ? 'Pay with MetaMask' : 'Buy Now'}
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
 

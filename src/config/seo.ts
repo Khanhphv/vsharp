@@ -1,4 +1,28 @@
 // SEO Configuration for VSharp
+// 
+// HOW TO USE:
+// 1. Import the configuration in your page:
+//    import { getSEOConfig, getStructuredData, SEO_CONFIG } from '../config/seo';
+//
+// 2. Get the SEO config for your page:
+//    const seoConfig = getSEOConfig('home'); // or 'tools', 'transactionDetails'
+//
+// 3. Add structured data if needed:
+//    const structuredData = [getStructuredData('organization')];
+//
+// 4. Use in your component:
+//    <SEOHead 
+//      title={seoConfig.title}
+//      description={seoConfig.description}
+//      keywords={seoConfig.keywords}
+//      url={seoConfig.url}
+//      structuredData={structuredData}
+//      googleAnalyticsId={SEO_CONFIG.analytics.googleAnalyticsId}
+//      googleTagManagerId={SEO_CONFIG.analytics.googleTagManagerId}
+//    />
+//
+// 5. For new pages, add configuration to the 'pages' object below.
+
 export const SEO_CONFIG = {
   // Site Information
   site: {
