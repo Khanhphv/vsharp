@@ -1,4 +1,21 @@
 // Network configuration from environment variables
+
+// Token configuration types
+interface TokenConfig {
+  address: string;
+  symbol: string;
+  decimals: number;
+  name: string;
+}
+
+interface NetworkTokens {
+  [chainId: string]: TokenConfig;
+}
+
+interface TokensConfig {
+  [tokenSymbol: string]: NetworkTokens;
+}
+
 export const NETWORK_CONFIG = {
   // Target network for payments
   TARGET_NETWORK: {
@@ -18,16 +35,38 @@ export const NETWORK_CONFIG = {
   },
 
   // Supported networks
-  SUPPORTED_NETWORKS: (import.meta.env.VITE_SUPPORTED_NETWORKS || '0x1,0x38,0x61').split(','),
+  SUPPORTED_NETWORKS: (import.meta.env.VITE_SUPPORTED_NETWORKS || '0x1').split(','),
 
   // Network names mapping
   NETWORK_NAMES: (() => {
     return {
       '0x1': 'Ethereum',
-      '0x38': 'BNB Smart Chain',
-      '0x61': 'BSC Testnet',
     };
   })(),
+
+  // Token configuration
+  TOKENS: {
+    // USDT on different networks
+    USDT: {
+      '0x1': {
+        // Ethereum
+        address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        symbol: 'USDT',
+        decimals: 6,
+        name: 'Tether USD',
+      },
+    },
+    // ETH token
+    ETH: {
+      '0x1': {
+        // Ethereum
+        address: '0x0000000000000000000000000000000000000000', // Native token
+        symbol: 'ETH',
+        decimals: 18,
+        name: 'Ethereum',
+      },
+    },
+  } as TokensConfig,
 };
 
 // Helper functions
@@ -46,4 +85,33 @@ export const getNetworkName = (chainId: string | null): string => {
 export const isSupportedNetwork = (chainId: string | null): boolean => {
   if (!chainId) return false;
   return NETWORK_CONFIG.SUPPORTED_NETWORKS.includes(chainId);
+};
+
+// Token helper functions
+export const getTokenConfig = (tokenSymbol: string, chainId: string | null): TokenConfig | null => {
+  if (!chainId || !tokenSymbol) return null;
+  const tokenNetworks = NETWORK_CONFIG.TOKENS[tokenSymbol];
+  return tokenNetworks?.[chainId] || null;
+};
+
+export const getSupportedTokens = (
+  chainId: string | null
+): (TokenConfig & { symbol: string })[] => {
+  if (!chainId) return [];
+
+  const supportedTokens: (TokenConfig & { symbol: string })[] = [];
+  for (const [symbol, networks] of Object.entries(NETWORK_CONFIG.TOKENS)) {
+    if (networks[chainId]) {
+      const tokenConfig = networks[chainId];
+      supportedTokens.push({
+        ...tokenConfig,
+        symbol, // Override with the key symbol
+      });
+    }
+  }
+  return supportedTokens;
+};
+
+export const isNativeToken = (tokenAddress: string): boolean => {
+  return tokenAddress === '0x0000000000000000000000000000000000000000';
 };

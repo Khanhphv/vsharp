@@ -2,9 +2,15 @@ import React, { useState } from 'react';
 import { FaRocket, FaShoppingCart, FaWallet } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../../src/context/WalletContext';
-import { NETWORK_CONFIG } from '../config/networks';
+import {
+  NETWORK_CONFIG,
+  getTokenConfig,
+  isNativeToken,
+  getSupportedTokens,
+} from '../config/networks';
 import SEOHead from '../components/SEOHead';
 import { getSEOConfig, getStructuredData, SEO_CONFIG } from '../config/seo';
+import { DISCORD_INVITE_LINK } from '../constants/links';
 
 // Web3 types
 interface EthereumProvider {
@@ -24,14 +30,16 @@ const features: {
   description: string;
   price: number | string;
   isSale: boolean;
-  ethPrice?: number; // ETH price in wei
+  ethPrice: number; // ETH price in wei
+  usdtPrice: number; // USDT price
 }[] = [
   {
     icon: <FaRocket className="w-8 h-8 md:w-10 md:h-10 text-primary-500" />,
     title: 'Apex-vsharp',
     description: 'VSHARP PRODUCT FOR APEX LEGENDS',
     price: '0.06LTC',
-    ethPrice: 0.008,
+    ethPrice: 0.00034,
+    usdtPrice: 1, // $15 USDT
     isSale: true,
   },
   {
@@ -39,7 +47,8 @@ const features: {
     title: 'DF-MAIN',
     description: 'Main delta force cheat.',
     price: '0.06LTC',
-    ethPrice: 0.008,
+    ethPrice: 0.00034,
+    usdtPrice: 1,
     isSale: true,
   },
   {
@@ -47,7 +56,8 @@ const features: {
     title: 'RUST-HYPRO',
     description: 'This service is specific for Seller HYDRO for RUST cheat.',
     price: '0.06LTC',
-    ethPrice: 0.008,
+    ethPrice: 0.00034,
+    usdtPrice: 1,
     isSale: true,
   },
   {
@@ -55,7 +65,8 @@ const features: {
     title: 'BO6-VSHARP',
     description: 'This is a vsharp brand of Black OPS 6 cheat.',
     price: '0.06LTC',
-    ethPrice: 0.008,
+    ethPrice: 0.00034,
+    usdtPrice: 1,
     isSale: true,
   },
 ];
@@ -84,8 +95,16 @@ async function createInvoice({
   return response.json();
 }
 
-// Web3 payment function with speed optimizations
-async function processWeb3Payment({ amount, service }: { amount: number; service: string }) {
+// Web3 payment function with token support
+async function processWeb3Payment({
+  amount,
+  service,
+  tokenSymbol,
+}: {
+  amount: number;
+  service: string;
+  tokenSymbol: string;
+}) {
   // Check if MetaMask is installed
   if (!window.ethereum) {
     throw new Error('MetaMask is not installed. Please install MetaMask to continue.');
@@ -99,34 +118,79 @@ async function processWeb3Payment({ amount, service }: { amount: number; service
     throw new Error('No account found. Please connect your MetaMask wallet.');
   }
 
-  // Check account balance before proceeding
-  const balance = (await window.ethereum.request({
-    method: 'eth_getBalance',
-    params: [account, 'latest'],
-  })) as string;
+  // Get current chain ID
+  const chainId = (await window.ethereum.request({ method: 'eth_chainId' })) as string;
 
-  const balanceInEth = parseInt(balance, 16) / 10 ** 18;
-  console.log('User balance:', balanceInEth, 'ETH');
-  console.log('Required amount:', amount, 'ETH');
-
-  // Simple balance check with buffer
-  if (balanceInEth < amount + 0.01) {
-    throw new Error(
-      `Insufficient balance. You have ${balanceInEth.toFixed(4)} ETH but need at least ${(amount + 0.01).toFixed(4)} ETH (including gas fees).`
-    );
+  // Get token configuration
+  const tokenConfig = getTokenConfig(tokenSymbol, chainId);
+  if (!tokenConfig) {
+    throw new Error(`${tokenSymbol} is not supported on this network.`);
   }
 
-  // Convert ETH amount to wei (1 ETH = 10^18 wei)
-  const amountInWei = (amount * 10 ** 18).toString(16);
-  console.log('Amount in wei:', amountInWei);
-
-  // Use simple transaction parameters without complex gas calculations
-  const transactionParameters = {
-    to: NETWORK_CONFIG.PAYMENT.walletAddress,
-    from: account,
-    value: `0x${amountInWei}`,
-    data: '0x',
+  let transactionParameters: {
+    to: string;
+    from: string;
+    value: string;
+    data: string;
   };
+
+  if (isNativeToken(tokenConfig.address)) {
+    // Native token payment (BNB, ETH)
+    const balance = (await window.ethereum.request({
+      method: 'eth_getBalance',
+      params: [account, 'latest'],
+    })) as string;
+
+    const balanceInEth = parseInt(balance, 16) / 10 ** 18;
+
+    if (balanceInEth < amount + 0.01) {
+      throw new Error(
+        `Insufficient balance. You have ${balanceInEth.toFixed(4)} ${tokenSymbol} but need at least ${(amount + 0.01).toFixed(4)} ${tokenSymbol} (including gas fees).`
+      );
+    }
+
+    const amountInWei = (amount * 10 ** 18).toString(16);
+
+    transactionParameters = {
+      to: NETWORK_CONFIG.PAYMENT.walletAddress,
+      from: account,
+      value: `0x${amountInWei}`,
+      data: '0x',
+    };
+  } else {
+    // ERC-20 token payment (USDT)
+    // First check USDT balance
+    const balanceData = {
+      to: tokenConfig.address,
+      data: `0x70a08231${account.slice(2).padStart(64, '0')}`, // balanceOf(address)
+    };
+
+    const balanceResult = (await window.ethereum.request({
+      method: 'eth_call',
+      params: [balanceData, 'latest'],
+    })) as string;
+
+    const balance = parseInt(balanceResult, 16) / 10 ** tokenConfig.decimals;
+    console.log('USDT balance:', balance);
+    console.log('Required USDT:', amount);
+
+    if (balance < amount) {
+      throw new Error(
+        `Insufficient USDT balance. You have ${balance.toFixed(2)} USDT but need ${amount} USDT.`
+      );
+    }
+
+    // Prepare USDT transfer data
+    const amountInSmallestUnit = (amount * 10 ** tokenConfig.decimals).toString(16);
+    const transferData = `0xa9059cbb${NETWORK_CONFIG.PAYMENT.walletAddress.slice(2).padStart(64, '0')}${amountInSmallestUnit.padStart(64, '0')}`;
+
+    transactionParameters = {
+      to: tokenConfig.address,
+      from: account,
+      value: '0x0',
+      data: transferData,
+    };
+  }
 
   console.log('Transaction parameters:', transactionParameters);
 
@@ -135,7 +199,7 @@ async function processWeb3Payment({ amount, service }: { amount: number; service
     const paramHash = await hashTransactionParams(transactionParameters);
     console.log('Transaction parameter hash:', paramHash);
 
-    // Send transaction with simple parameters
+    // Send transaction
     const txHash = await window.ethereum.request({
       method: 'eth_sendTransaction',
       params: [transactionParameters],
@@ -168,12 +232,14 @@ async function processWeb3Payment({ amount, service }: { amount: number; service
         service,
         userAddress: account,
         network: NETWORK_CONFIG.TARGET_NETWORK.name.toLowerCase().replace(' ', '_'),
+        tokenSymbol,
         paramHash,
         verificationHash,
       }),
     });
 
     if (!response.ok) {
+      alert('Please contact to admin via discord: ' + DISCORD_INVITE_LINK);
       throw new Error(`Payment verification failed: ${response.status}`);
     }
 
@@ -195,7 +261,7 @@ async function processWeb3Payment({ amount, service }: { amount: number; service
       } else if (error.message.includes('likely to fail')) {
         throw new Error('Transaction would fail. Please check your balance and try again.');
       } else if (error.message.includes('insufficient funds')) {
-        throw new Error('Insufficient funds. Please add more ETH to your wallet.');
+        throw new Error(`Insufficient funds. Please add more ${tokenSymbol} to your wallet.`);
       } else if (error.message.includes('user rejected')) {
         throw new Error('Transaction was cancelled by user.');
       } else if (error.message.includes('nonce')) {
@@ -351,6 +417,7 @@ async function hashTransactionParams(params: {
   const paramString = JSON.stringify(params, Object.keys(params).sort());
   return await hashTransaction(paramString);
 }
+const DEFAULT_PAYMENT_METHOD = 'web3';
 
 const Tools: React.FC = () => {
   const navigate = useNavigate();
@@ -368,7 +435,9 @@ const Tools: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'ltc' | 'web3'>('ltc');
+  const [paymentMethod, setPaymentMethod] = useState<'ltc' | 'web3'>(DEFAULT_PAYMENT_METHOD);
+  const [selectedToken, setSelectedToken] = useState<string>('ETH');
+  const [currentChainId, setCurrentChainId] = useState<string | null>(null);
   const [transactionStatus, setTransactionStatus] = useState<{
     status: 'pending' | 'confirmed' | 'failed' | 'timeout';
     confirmations?: number;
@@ -380,10 +449,7 @@ const Tools: React.FC = () => {
 
   // SEO Configuration
   const seoConfig = getSEOConfig('tools');
-  const structuredData = [
-    getStructuredData('organization'),
-    getStructuredData('breadcrumbList')
-  ];
+  const structuredData = [getStructuredData('organization'), getStructuredData('breadcrumbList')];
 
   const handleFeatureClick = (feature: (typeof features)[0]) => {
     setSelectedFeature(feature);
@@ -393,7 +459,8 @@ const Tools: React.FC = () => {
     setSuccess(null);
     setTransactionStatus(null);
     setCurrentTxHash(null);
-    setPaymentMethod('ltc');
+    setPaymentMethod(DEFAULT_PAYMENT_METHOD);
+    setSelectedToken('ETH');
   };
 
   const handleClosePopup = () => {
@@ -404,7 +471,8 @@ const Tools: React.FC = () => {
     setSuccess(null);
     setTransactionStatus(null);
     setCurrentTxHash(null);
-    setPaymentMethod('ltc');
+    setPaymentMethod(DEFAULT_PAYMENT_METHOD);
+    setSelectedToken('ETH');
   };
 
   const handleBuy = async (e: React.FormEvent) => {
@@ -432,10 +500,12 @@ const Tools: React.FC = () => {
           return;
         }
 
-        const ethAmount = (selectedFeature.ethPrice || 0.008) * amount;
+        const tokenAmount = getTotalPrice();
+
         const result = await processWeb3Payment({
-          amount: ethAmount,
+          amount: tokenAmount,
           service: selectedFeature.title,
+          tokenSymbol: selectedToken || 'ETH',
         });
 
         setCurrentTxHash(result.txHash as string);
@@ -483,7 +553,14 @@ const Tools: React.FC = () => {
     if (!selectedFeature) return 0;
 
     if (paymentMethod === 'web3') {
-      return (selectedFeature.ethPrice || 0.00044) * amount;
+      if (selectedToken === 'USDT') {
+        return selectedFeature.usdtPrice * amount;
+      } else if (selectedToken === 'ETH') {
+        return selectedFeature.ethPrice * amount;
+      } else {
+        // Default to ETH price for other tokens
+        return selectedFeature.ethPrice * amount;
+      }
     } else {
       return parseFloat(String(selectedFeature.price).replace(/[^\d.]/g, '')) * amount;
     }
@@ -493,7 +570,7 @@ const Tools: React.FC = () => {
     if (!selectedFeature) return '';
 
     if (paymentMethod === 'web3') {
-      return `${getTotalPrice()} ${NETWORK_CONFIG.TARGET_NETWORK.symbol}`;
+      return `${getTotalPrice()} ${selectedToken}`;
     } else {
       return `${getTotalPrice()} LTC`;
     }
@@ -582,6 +659,37 @@ const Tools: React.FC = () => {
     }
   };
 
+  // Get available tokens for current network
+  const getAvailableTokens = () => {
+    if (!currentChainId) return [];
+    return getSupportedTokens(currentChainId);
+  };
+
+  // Update chain ID when wallet connects or network changes
+  React.useEffect(() => {
+    const updateChainId = async () => {
+      if (window.ethereum && walletConnected) {
+        try {
+          const chainId = (await window.ethereum.request({ method: 'eth_chainId' })) as string;
+          setCurrentChainId(chainId);
+
+          // Set default token based on available tokens
+          const availableTokens = getSupportedTokens(chainId);
+          if (
+            availableTokens.length > 0 &&
+            !availableTokens.find((t) => t.symbol === selectedToken)
+          ) {
+            setSelectedToken(availableTokens[0].symbol);
+          }
+        } catch (error) {
+          console.error('Failed to get chain ID:', error);
+        }
+      }
+    };
+
+    updateChainId();
+  }, [walletConnected, selectedToken]);
+
   const getErrorDisplay = (errorMessage: string) => {
     if (errorMessage.includes('Insufficient balance')) {
       return (
@@ -636,7 +744,7 @@ const Tools: React.FC = () => {
 
   return (
     <>
-      <SEOHead 
+      <SEOHead
         title={seoConfig.title}
         description={seoConfig.description}
         keywords={seoConfig.keywords}
@@ -701,7 +809,7 @@ const Tools: React.FC = () => {
                         <span className="text-lg font-bold text-primary-500">${feature.price}</span>
                         <br />
                         <span className="text-sm text-gray-400">
-                          or {feature.ethPrice} {NETWORK_CONFIG.TARGET_NETWORK.symbol}
+                          or {feature.ethPrice} ETH / {feature.usdtPrice} USDT
                         </span>
                       </div>
                       <p
@@ -769,7 +877,7 @@ const Tools: React.FC = () => {
                   Payment Method
                 </label>
                 <div className="flex gap-3">
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => setPaymentMethod('ltc')}
                     className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
@@ -779,7 +887,7 @@ const Tools: React.FC = () => {
                     }`}
                   >
                     Litecoin (LTC)
-                  </button>
+                  </button> */}
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('web3')}
@@ -794,6 +902,37 @@ const Tools: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Token Selection for Web3 */}
+              {paymentMethod === 'web3' && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-dark-secondary mb-3">
+                    Select Token
+                  </label>
+                  {currentChainId ? (
+                    <div className="flex gap-3 flex-wrap">
+                      {getAvailableTokens().map((token) => (
+                        <button
+                          key={token.symbol}
+                          type="button"
+                          onClick={() => setSelectedToken(token.symbol)}
+                          className={`flex-1 min-w-[80px] py-2 px-4 rounded-lg border transition-colors ${
+                            selectedToken === token.symbol
+                              ? 'border-primary-500 bg-primary-500/20 text-primary-500'
+                              : 'border-dark-border text-dark-secondary hover:border-primary-500'
+                          }`}
+                        >
+                          {token.symbol}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-400">
+                      Connect wallet to see available tokens
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Wallet Connection Status */}
               {paymentMethod === 'web3' && (
@@ -893,7 +1032,8 @@ const Tools: React.FC = () => {
                   type="submit"
                   className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300"
                   disabled={
-                    loading || (paymentMethod === 'web3' && (!walletConnected || !isOnTargetNetwork))
+                    loading ||
+                    (paymentMethod === 'web3' && (!walletConnected || !isOnTargetNetwork))
                   }
                 >
                   {loading ? (
