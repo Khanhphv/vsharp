@@ -452,7 +452,8 @@ const Tools: React.FC = () => {
   const structuredData = [getStructuredData('organization'), getStructuredData('breadcrumbList')];
 
   const handleFeatureClick = (feature: (typeof features)[0]) => {
-    setSelectedFeature(feature);
+    // setSelectedFeature(feature);
+    console.log('feature', feature);
     setAmount(1);
     setEmail('');
     setError(null);
@@ -1028,7 +1029,7 @@ const Tools: React.FC = () => {
 
                 {getTransactionStatusDisplay()}
 
-                {/* <button
+                <button
                   type="submit"
                   className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors duration-300"
                   disabled={
@@ -1048,7 +1049,7 @@ const Tools: React.FC = () => {
                       {paymentMethod === 'web3' ? 'Pay with MetaMask' : 'Buy Now'}
                     </>
                   )}
-                </button> */}
+                </button>
               </form>
             </div>
           </div>
